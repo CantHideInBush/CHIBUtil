@@ -1,0 +1,8 @@
+invalid-command-sender: "Niepoprawny nadawca komendy"
+invalid-command-sender-player: "To polecenie nie jest przeznaczone dla graczy!"
+invalid-command-sender-console: "To polecenie nie jest przeznaczone dla konsoli!"
+
+
+
+command-arguments-insufficient: "Nie podano wystarczajacej ilosci argumentow!"
+command-arguments-unknown: "Nie odnaleziono argumentu &e'%s'"

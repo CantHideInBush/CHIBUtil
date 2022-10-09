@@ -1,0 +1,6 @@
+authors: [CantHideInBush]
+main: com.canthideinbush.utils.CHIBUtils
+version: SNAPSHOT-1.0.0
+name: CHIBUtils
+description: Various utilities
+api-version: 1.18
