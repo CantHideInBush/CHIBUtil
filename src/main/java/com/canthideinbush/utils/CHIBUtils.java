@@ -1,6 +1,7 @@
 package com.canthideinbush.utils;
 
 import com.canthideinbush.utils.chat.ChatUtils;
+import com.canthideinbush.utils.storing.ConfigMerger;
 import com.canthideinbush.utils.storing.YAMLConfig;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -27,8 +28,7 @@ public class CHIBUtils extends CHIBPlugin {
         config = new YAMLConfig(this, "config", true);
         messageConfig = new YAMLConfig(this, "default_messages", true);
 
-        utilsProvider = new UtilsProvider();
-        utilsProvider.setChatUtils(new ChatUtils(this));
+        CHIBInit();
 
     }
 

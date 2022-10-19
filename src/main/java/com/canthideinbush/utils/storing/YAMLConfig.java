@@ -86,6 +86,7 @@ public class YAMLConfig extends YamlConfiguration {
         if (!file.exists()) {
             file.getParentFile().mkdirs();
             if (copyResource) {
+
                 plugin.saveResource(fileName + ".yml", false);
             }
             else {
@@ -95,12 +96,31 @@ public class YAMLConfig extends YamlConfiguration {
                     e.printStackTrace();
                 }
             }
+            try {
+                load(file);
+            } catch (InvalidConfigurationException | IOException e) {
+                e.printStackTrace();
+            }
         }
-        try {
-            load(file);
-        } catch (InvalidConfigurationException | IOException e) {
-            e.printStackTrace();
+        else if (copyResource) {
+            YamlConfiguration def = null;
+            try {
+                load(file);
+                plugin.saveResource(fileName + ".yml", true);
+                def = new YamlConfiguration();
+                def.load(file);
+
+            } catch (InvalidConfigurationException | IOException e) {
+                e.printStackTrace();
+            }
+
+            new ConfigMerger(def, this).merge();
+            save();
+
         }
+
+
+
     }
 
     public YAMLConfig(CHIBPlugin plugin, String fileName) {

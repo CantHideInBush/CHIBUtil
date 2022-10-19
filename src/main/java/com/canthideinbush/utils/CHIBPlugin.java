@@ -17,8 +17,7 @@ public abstract class CHIBPlugin extends JavaPlugin {
     }
 
     protected void CHIBInit() {
-        this.utilsProvider = new UtilsProvider();
-        this.utilsProvider.setChatUtils(new ChatUtils(this));
+        this.utilsProvider = new UtilsProvider(this);
     }
 
     //Requires public static CHIBPlugin getInstance()
