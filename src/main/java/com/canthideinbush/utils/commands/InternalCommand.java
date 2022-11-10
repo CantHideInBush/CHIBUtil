@@ -41,14 +41,20 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
         return this.getClass();
     }
 
-    public abstract InternalCommand getParentCommand();
+    public abstract Class<? extends InternalCommand> getParentCommandClass();
+
+    public InternalCommand getParentCommand() {
+        return CHIBCommandsRegistry.get(getParentCommandClass());
+    }
 
     public CHIBPlugin getPlugin() {
         return getParentCommand().getPlugin();
     }
 
 
-    public abstract String getPermission();
+    public String getPermission() {
+        return getName();
+    }
 
     public String getAbsolutePermission() {
         if (getParentCommand() != null) return  getParentCommand().getAbsolutePermission();
@@ -61,7 +67,7 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
 
     public int getArgIndex() {
         if (getParentCommand() == null) return 0;
-        return getParentCommand().getArgIndex() + 1;
+        return getParentCommand().getArgIndex() + getParentCommand().getArgCount();
     }
 
     public boolean execute(CommandSender sender, String[] args) {
@@ -113,16 +119,22 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
         return execute(commandSender, args);
     }
 
+    public int getArgCount() {
+        return 1;
+    }
+
 
 
 
     public void register(CHIBPlugin plugin) {
         CHIBCommandsRegistry.instance.register(this);
-        PluginCommand pluginCommand = Reflector.newInstance(PluginCommand.class, new Class[]{String.class, Plugin.class}, this.getName(), plugin);
-        assert pluginCommand != null;
-        pluginCommand.setExecutor(this);
-        pluginCommand.setTabCompleter(this);
-        pluginCommand.setPermission(this.getAbsolutePermission());
-        Bukkit.getCommandMap().register(this.getName(), pluginCommand);
+        if (getParentCommand() == null) {
+            PluginCommand pluginCommand = Reflector.newInstance(PluginCommand.class, new Class[]{String.class, Plugin.class}, this.getName(), plugin);
+            assert pluginCommand != null;
+            pluginCommand.setExecutor(this);
+            pluginCommand.setTabCompleter(this);
+            pluginCommand.setPermission(this.getAbsolutePermission());
+            Bukkit.getCommandMap().register(this.getName(), pluginCommand);
+        }
     }
 }

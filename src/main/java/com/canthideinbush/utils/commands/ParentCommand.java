@@ -5,6 +5,7 @@ import com.canthideinbush.utils.UtilsProvider;
 import com.canthideinbush.utils.storing.ArgParser;
 import org.bukkit.command.CommandSender;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +13,9 @@ import java.util.stream.Collectors;
 
 public abstract class ParentCommand extends InternalCommand {
 
-    public abstract Collection<InternalCommand> getSubcommands();
+    public Collection<InternalCommand> getSubcommands() {return subCommands;}
+
+    protected final ArrayList<InternalCommand> subCommands = new ArrayList<>();
 
 
     private CHIBPlugin plugin;
@@ -67,10 +70,10 @@ public abstract class ParentCommand extends InternalCommand {
     @Override
     public List<String> complete(String[] args) {
         InternalCommand subCommand;
-        if (args.length - 1 == getArgIndex()) {
+        if (args.length == getArgIndex() + getArgCount()) {
             return getSubcommands().stream().map(InternalCommand::getName).collect(Collectors.toList());
         }
-        else if ((subCommand = getSubCommand(args[getArgIndex()])) != null) {
+        else if ((subCommand = getSubCommand(args[getArgIndex() + getArgCount() - 1])) != null) {
             return subCommand.complete(args);
         }
         return Collections.emptyList();

@@ -20,7 +20,6 @@ public class ConfigMerger {
                 into.set(key, merge.get(key));
             }
         }
-        System.out.println(into.saveToString());
     }
 
 

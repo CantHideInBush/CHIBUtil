@@ -5,4 +5,7 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface YAMLElement {
+
+    //Object defaultValue = null;
+
 }

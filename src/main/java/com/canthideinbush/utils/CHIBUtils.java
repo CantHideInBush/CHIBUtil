@@ -1,13 +1,18 @@
 package com.canthideinbush.utils;
 
-import com.canthideinbush.utils.chat.ChatUtils;
-import com.canthideinbush.utils.storing.ConfigMerger;
+import com.canthideinbush.utils.storing.items.AxolotlBucketValues;
+import com.canthideinbush.utils.storing.items.HRItem;
 import com.canthideinbush.utils.storing.YAMLConfig;
-import org.bukkit.plugin.java.JavaPlugin;
+import com.canthideinbush.utils.tempblock.TempBlockManager;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.jetbrains.annotations.NotNull;
 
 public class CHIBUtils extends CHIBPlugin {
 
+    static {
+        ConfigurationSerialization.registerClass(HRItem.class);
+        ConfigurationSerialization.registerClass(AxolotlBucketValues.class);
+    }
 
     private YAMLConfig config;
     private YAMLConfig messageConfig;
@@ -15,11 +20,14 @@ public class CHIBUtils extends CHIBPlugin {
     private UtilsProvider utilsProvider;
 
 
+
     private static CHIBUtils instance;
 
     public static CHIBUtils getInstance() {
         return instance;
     }
+
+    private TempBlockManager tempBlockManager;
 
     @Override
     public void onEnable() {
@@ -30,6 +38,13 @@ public class CHIBUtils extends CHIBPlugin {
 
         CHIBInit();
 
+        this.tempBlockManager = new TempBlockManager();
+
+    }
+
+    @Override
+    public void onDisable() {
+        tempBlockManager.revertAll();
     }
 
     @Override

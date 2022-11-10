@@ -5,7 +5,7 @@ import com.canthideinbush.utils.chat.ChatUtils;
 public class UtilsProvider {
 
     private final CHIBPlugin plugin;
-    private final WorldEditUtils worldEdit;
+
 
     public UtilsProvider(CHIBPlugin plugin) {
         this.plugin = plugin;
@@ -16,7 +16,7 @@ public class UtilsProvider {
 
 
     public ChatUtils chat;
-
+    public final WorldEditUtils worldEdit;
 
     public void setChatUtils(ChatUtils chatUtils) {
         this.chat = chatUtils;

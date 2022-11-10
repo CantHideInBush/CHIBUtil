@@ -1,6 +1,7 @@
 package com.canthideinbush.utils.storing;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
 
@@ -24,6 +25,10 @@ public class ArgParser {
         return args.length > index;
     }
 
+    public boolean hasNext(int i) {
+        return args.length > index + i - 1;
+    }
+
     public String current() {
         return args[index];
     }
@@ -42,6 +47,14 @@ public class ArgParser {
 
     public double nextDouble() {
         return Double.parseDouble(next());
+    }
+
+    public boolean nextBoolean() {
+        return Boolean.parseBoolean(next());
+    }
+
+    public Material nextMaterial() {
+        return Material.valueOf(next().toUpperCase());
     }
 
     public Vector nextVector() {

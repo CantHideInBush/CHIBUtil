@@ -29,7 +29,8 @@ public class WorldEditUtils {
 
 
     public Clipboard findByName(String name) {
-        File schemFile = new File(FileUtils.withDefaultParent(provider.getPlugin().getDataFolder(), CHIBUtils.getInstance().getConfig().getString("schematicsPath")) + File.separator + name);
+        File schemFile = new File(FileUtils.withDefaultParent(provider.getPlugin().getDataFolder(), provider.getPlugin().getConfig().getString("schematicsPath", "schematics")) + File.separator + name);
+        System.out.println(schemFile);
         ClipboardFormat format = ClipboardFormats.findByFile(schemFile);
         try {
             if (format != null) {
@@ -43,14 +44,16 @@ public class WorldEditUtils {
 
     public void pasteAt(Location location, String name) {
         Clipboard clipboard = findByName(name);
-        Operation operation = new ClipboardHolder(clipboard).createPaste(WorldEdit.getInstance()
-                .newEditSession(BukkitAdapter.adapt(location.getWorld())))
-                .to(BlockVector3.at(location.getBlockX(), location.getBlockY(), location.getBlockZ())).build();
+        EditSession session = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(location.getWorld()));
+        Operation operation = new ClipboardHolder(clipboard).createPaste(session)
+                .to(BlockVector3.at(location.getBlockX(), location.getBlockY(), location.getBlockZ()))
+                .build();
         try {
             Operations.complete(operation);
         } catch (WorldEditException e) {
             e.printStackTrace();
         }
+        session.close();
     }
 
 

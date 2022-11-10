@@ -17,12 +17,20 @@ public interface ABSave extends ConfigurationSerializable {
         return map;
     }
 
+
+    default boolean saveNullFields() {
+        return true;
+    }
+
     default void serializeToMap(Map<String, Object> map) {
         for (Field f : this.getClass().getDeclaredFields()) {
             if (f.isAnnotationPresent(YAMLElement.class)) {
                 f.setAccessible(true);
                 try {
-                    map.put(f.getName(), YAMLConfig.serialize(f.get(this)));
+                    Object obj = f.get(this);
+                    if (saveNullFields() || obj != null) {
+                        map.put(f.getName(), YAMLConfig.serialize(f.getType(), obj));
+                    }
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
@@ -35,6 +43,8 @@ public interface ABSave extends ConfigurationSerializable {
             if (f.isAnnotationPresent(YAMLElement.class)) {
                 f.setAccessible(true);
                 try {
+
+                    if (map.containsKey(f.getName()))
                     f.set(this, YAMLConfig.deserialize(f.getType(), map.get(f.getName())));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();

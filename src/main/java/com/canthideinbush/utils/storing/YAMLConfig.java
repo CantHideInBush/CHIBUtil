@@ -2,19 +2,27 @@ package com.canthideinbush.utils.storing;
 
 import com.canthideinbush.utils.CHIBPlugin;
 import com.canthideinbush.utils.CHIBUtils;
+import com.canthideinbush.utils.Reflector;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Axolotl;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class YAMLConfig extends YamlConfiguration {
 
@@ -55,17 +63,57 @@ public class YAMLConfig extends YamlConfiguration {
         });
 
 
+        //Material
+        serializers.put(Material.class, m -> ((Material) m).name());
+        deserializers.put(Material.class, m -> Material.valueOf(m.toUpperCase()));
+
+
+
+        //Kyori adventure component
+        serializers.put(Component.class, c -> LegacyComponentSerializer.legacyAmpersand().serialize((Component) c));
+        deserializers.put(Component.class, s -> LegacyComponentSerializer.legacyAmpersand().deserialize(s));
+
+
+        //Axolotl Variant
+        serializers.put(Axolotl.Variant.class, v -> ((Axolotl.Variant) v).name());
+        deserializers.put(Axolotl.Variant.class, Axolotl.Variant::valueOf);
+
     }
 
-    public static <T> Object serialize(T t) {
-        if (t != null && serializers.containsKey(t.getClass())) {
-            return serializers.get(t.getClass()).apply(t);
+    public static <T> Object serialize(Class<?> c, T t) {
+        if (t instanceof Collection) {
+            return serializeCollection((Collection<?>) t);
+        }
+        if (t != null && serializers.containsKey(c)) {
+            return serializers.get(c).apply(t);
         }
 
         return t;
     }
 
+
+    public static <T> Collection<?> serializeCollection(Collection<T> collection) {
+        Class<T> type = (Class<T>) Reflector.getCollectionType(collection);
+        if (serializers.containsKey(type)) {
+            Function<Object, String> serializer = serializers.get(type);
+            return collection.stream().map(serializer).collect(Collectors.toList());
+        }
+        return collection;
+    }
+
+    public static <T> Collection<T> deserializeCollection(Class<T> t, Collection<Object> collection) {
+        Class<T> type = (Class<T>) Reflector.getCollectionType(collection);
+        if (String.class.equals(t) && deserializers.containsKey(t)) {
+            Function<String, Object> deserializer = deserializers.get(type);
+            return collection.stream().map(o -> (T) deserializer.apply((String) o)).collect(Collectors.toList());
+        }
+        return (Collection<T>) collection;
+    }
+
     public static <T> T deserialize(Class<T> t, Object data) {
+        if (Collection.class.isAssignableFrom(t)) {
+            return (T) deserializeCollection(t, (Collection<Object>) data);
+        }
         if (data instanceof String && deserializers.containsKey(t)) {
             return (T) deserializers.get(t).apply((String) data);
         }
@@ -117,6 +165,13 @@ public class YAMLConfig extends YamlConfiguration {
             new ConfigMerger(def, this).merge();
             save();
 
+        }
+        else {
+            try {
+                load(file);
+            } catch (IOException | InvalidConfigurationException e) {
+                e.printStackTrace();
+            }
         }
 
 

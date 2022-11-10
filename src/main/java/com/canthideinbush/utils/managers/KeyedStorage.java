@@ -7,6 +7,7 @@ public interface KeyedStorage<T extends Keyed<?>> {
     Collection<T> getObjects();
 
     default void register(T t) {
+        if (t == null) return;
         getObjects().add(t);
     }
 
@@ -16,7 +17,7 @@ public interface KeyedStorage<T extends Keyed<?>> {
 
     default T findByKey(Object key) {
         for (T t : getObjects()) {
-            if (key.equals(t.getKey())) return t;
+            if (t.getKey().equals(key)) return t;
         }
 
         return null;
