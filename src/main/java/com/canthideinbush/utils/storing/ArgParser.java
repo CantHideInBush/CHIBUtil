@@ -37,6 +37,10 @@ public class ArgParser {
         return args[index++];
     }
 
+    public String previous() {
+        return args[index - 1];
+    }
+
     public int nextInt() {
         return Integer.parseInt(next());
     }

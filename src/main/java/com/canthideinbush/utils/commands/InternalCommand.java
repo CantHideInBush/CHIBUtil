@@ -5,6 +5,8 @@ import com.canthideinbush.utils.Reflector;
 import com.canthideinbush.utils.UtilsProvider;
 import com.canthideinbush.utils.chat.ChatUtils;
 import com.canthideinbush.utils.managers.Keyed;
+import com.canthideinbush.utils.storing.ArgParser;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -19,6 +21,9 @@ import org.checkerframework.checker.units.qual.C;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class InternalCommand implements TabCompleter, CommandExecutor, Keyed<Class<? extends InternalCommand>> {
@@ -32,6 +37,10 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
 
     public InternalCommand(CHIBPlugin plugin) {
         this.register(plugin);
+    }
+
+    public InternalCommand(CHIBPlugin plugin, String name) {
+        this.register(plugin, name);
     }
 
     public abstract String getName();
@@ -57,7 +66,7 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
     }
 
     public String getAbsolutePermission() {
-        if (getParentCommand() != null) return  getParentCommand().getAbsolutePermission();
+        if (getParentCommand() != null) return getParentCommand().getAbsolutePermission() + "." + getPermission();
         return getPermission();
     }
 
@@ -116,12 +125,18 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
 
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+        if (!commandSender.hasPermission(getPermission(command.getName(), args))) {
+            sendConfigErrorMessage(commandSender, "common.permission-insufficient", getPermission(command.getName(), args));
+            return false;
+        }
         return execute(commandSender, args);
     }
 
     public int getArgCount() {
         return 1;
     }
+
+
 
 
 
@@ -133,8 +148,46 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
             assert pluginCommand != null;
             pluginCommand.setExecutor(this);
             pluginCommand.setTabCompleter(this);
-            pluginCommand.setPermission(this.getAbsolutePermission());
+            //pluginCommand.setPermission(this.getAbsolutePermission());
+            //pluginCommand.permissionMessage(LegacyComponentSerializer.legacyAmpersand().deserialize());
             Bukkit.getCommandMap().register(this.getName(), pluginCommand);
         }
     }
+
+    public void register(CHIBPlugin plugin, String name) {
+        CHIBCommandsRegistry.instance.register(this);
+        if (getParentCommand() == null) {
+            PluginCommand pluginCommand = Reflector.newInstance(PluginCommand.class, new Class[]{String.class, Plugin.class}, name, plugin);
+            assert pluginCommand != null;
+            pluginCommand.setExecutor(this);
+            pluginCommand.setTabCompleter(this);
+            //pluginCommand.setPermission(this.getAbsolutePermission());
+            //pluginCommand.permissionMessage(LegacyComponentSerializer.legacyAmpersand().deserialize());
+            Bukkit.getCommandMap().register(name, pluginCommand);
+        }
+    }
+
+
+    public static String getPermission(String command, String[] args) {
+        ArgParser parser = new ArgParser(args);
+        InternalCommand c = CHIBCommandsRegistry.getParentCommand(command);
+        if (c == null) return "";
+        while (parser.hasNext() && c instanceof ParentCommand && ((ParentCommand) c).getSubCommand(parser.next()) != null) {
+            c = ((ParentCommand) c).getSubCommand(parser.previous());
+        }
+        return c.getAbsolutePermission();
+    }
+
+    public static InternalCommand getCommand(String command) {
+        return CHIBCommandsRegistry.getParentCommand(command);
+    }
+
+    public static List<String> getCompletion(String command, String[] args) {
+        InternalCommand c = CHIBCommandsRegistry.getParentCommand(command);
+        if (c == null) return Collections.emptyList();
+        ArrayList<String> tabArgs = new ArrayList<>(List.of(args));
+        tabArgs.add(0, command);
+        return c.complete(tabArgs.toArray(new String[]{}));
+    }
+
 }

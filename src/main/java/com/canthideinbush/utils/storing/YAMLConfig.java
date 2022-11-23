@@ -133,7 +133,7 @@ public class YAMLConfig extends YamlConfiguration {
         file = new File(getPluginsFolderPath() + fileName + ".yml");
         if (!file.exists()) {
             file.getParentFile().mkdirs();
-            if (copyResource) {
+            if (copyResource && plugin.getResource(fileName + ".yml") != null) {
 
                 plugin.saveResource(fileName + ".yml", false);
             }
@@ -150,7 +150,7 @@ public class YAMLConfig extends YamlConfiguration {
                 e.printStackTrace();
             }
         }
-        else if (copyResource) {
+        else if (copyResource && plugin.getResource(fileName + ".yml") != null) {
             YamlConfiguration def = null;
             try {
                 load(file);
