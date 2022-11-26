@@ -6,3 +6,8 @@ incorrect_data_type: "Niepoprawny typ danych"
 
 command-arguments-insufficient: "Nie podano wystarczajacej ilosci argumentow!"
 command-arguments-unknown: "Nie odnaleziono argumentu &e'%s'"
+
+
+common:
+  funds-insufficient: "Nie posiadasz wystarczajacej ilosci pieniedzy!"
+  purchase-successful: "Zakupiles przedmiot! Nowy balans: %s"
