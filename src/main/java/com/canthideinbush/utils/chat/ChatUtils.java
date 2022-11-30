@@ -5,6 +5,7 @@ import com.canthideinbush.utils.CHIBUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
 
 public class ChatUtils {
 
@@ -26,6 +27,14 @@ public class ChatUtils {
 
     public String getMessage(String path) {
         return ChatColor.translateAlternateColorCodes('&', messageConfig.getString(path, getDefaultMessage(path)));
+    }
+
+    public void sendConfigMessage(String path, Entity entity, ChatColor color) {
+        entity.sendMessage(createMessage(getMessage(path), color));
+    }
+
+    public void sendConfigMessage(String path, Entity entity, ChatColor color, Object... args) {
+        entity.sendMessage(createMessage(String.format(getMessage(path), args), color));
     }
 
     private String getDefaultMessage(String path) {

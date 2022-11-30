@@ -4,8 +4,13 @@ invalid-command-sender-console: "To polecenie nie jest przeznaczone dla konsoli!
 
 common:
   permission-insufficient: "Niewystarczajace uprawnienia! (%s)"
+  funds-insufficient: "Nie posiadasz wystarczajacej ilosci pieniedzy!"
+  purchase-successful: "Zakupiles przedmiot! Nowy balans: %s"
 
 incorrect_data_type: "Niepoprawny typ danych"
 
 command-arguments-insufficient: "Nie podano wystarczajacej ilosci argumentow!"
 command-arguments-unknown: "Nie odnaleziono argumentu &e'%s'"
+
+permissions-insufficient: "Nie posiadasz wystarczajcych uprawnien! (%s)"
+

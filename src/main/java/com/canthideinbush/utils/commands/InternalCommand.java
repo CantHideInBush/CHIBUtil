@@ -125,8 +125,8 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
 
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        if (!commandSender.hasPermission(getPermission(command.getName(), args))) {
-            sendConfigErrorMessage(commandSender, "common.permission-insufficient", getPermission(command.getName(), args));
+        if (!commandSender.hasPermission(getAbsolutePermission())) {
+            sendConfigErrorMessage(commandSender, "permissions-insufficient", getAbsolutePermission());
             return false;
         }
         return execute(commandSender, args);
