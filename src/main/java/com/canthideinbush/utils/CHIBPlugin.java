@@ -1,6 +1,7 @@
 package com.canthideinbush.utils;
 
 import com.canthideinbush.utils.chat.ChatUtils;
+import com.canthideinbush.utils.gui.GUIManager;
 import com.canthideinbush.utils.storing.YAMLConfig;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -18,8 +19,14 @@ public abstract class CHIBPlugin extends JavaPlugin {
         return utilsProvider;
     }
 
+    private GUIManager guiManager;
+    public GUIManager getGuiManager() {
+        return guiManager;
+    }
+
     protected void CHIBInit() {
         this.utilsProvider = new UtilsProvider(this);
+        this.guiManager = new GUIManager(this);
         createSchematicsFolder();
     }
 

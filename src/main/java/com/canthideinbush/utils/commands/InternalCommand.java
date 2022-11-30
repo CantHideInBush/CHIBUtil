@@ -57,7 +57,7 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
     }
 
     public String getAbsolutePermission() {
-        if (getParentCommand() != null) return  getParentCommand().getAbsolutePermission();
+        if (getParentCommand() != null) return  getParentCommand().getAbsolutePermission() + "." + getPermission();
         return getPermission();
     }
 
@@ -116,6 +116,10 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
 
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+        if (!commandSender.hasPermission(getAbsolutePermission())) {
+            sendConfigErrorMessage(commandSender, "permissions-insufficient", getAbsolutePermission());
+            return false;
+        }
         return execute(commandSender, args);
     }
 

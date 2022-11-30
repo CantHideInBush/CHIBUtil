@@ -5,6 +5,7 @@ import com.canthideinbush.utils.CHIBUtils;
 import com.canthideinbush.utils.gui.BasicGUI;
 import com.canthideinbush.utils.storing.ABSave;
 import com.canthideinbush.utils.storing.YAMLElement;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -19,24 +20,33 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 
 @SerializableAs("BasicShopGUI")
-public abstract class BasicShopGUI extends BasicGUI implements ABSave {
+public class BasicShopGUI extends BasicGUI implements ABSave {
 
 
-    public BasicShopGUI(int size) {
+    public BasicShopGUI(CHIBPlugin plugin, int size) {
         this.size = size;
+        this.plugin = plugin;
+        this.pluginName = plugin.getName();
     }
 
     public BasicShopGUI(Map<String, Object> map) {
         deserializeFromMap(map);
+        this.plugin = (CHIBPlugin) Bukkit.getPluginManager().getPlugin(pluginName);
     }
 
+
+    private final CHIBPlugin plugin;
+    @YAMLElement
+    public String pluginName;
 
     @YAMLElement
     public HashMap<Integer, ItemStack> contents = new HashMap<>();
@@ -62,7 +72,22 @@ public abstract class BasicShopGUI extends BasicGUI implements ABSave {
     public boolean initialize() {
         if (CHIBUtils.vaultEconomy == null) return false;
         createInventory();
-        contents.forEach((slot, item) -> inventory.setItem(slot, item));
+        contents.forEach((slot, original) -> {
+            ItemStack item = original.clone();
+            if (price.containsKey(slot)) item.editMeta(m -> {
+                List<Component> lore;
+                if (m.hasLore()) {
+                    lore = m.lore();
+                }
+                else lore = new ArrayList<>();
+                assert lore != null;
+                lore.add(Component.text(""));
+                lore.add(Component.text(""));
+                lore.add(Component.text(ChatColor.GREEN + "Cena: " + price.get(slot)));
+                m.lore(lore);
+            });
+            inventory.setItem(slot, item);
+        });
         return true;
     }
 
@@ -105,11 +130,13 @@ public abstract class BasicShopGUI extends BasicGUI implements ABSave {
     }
 
 
-    public abstract CHIBPlugin getPlugin();
+    public CHIBPlugin getPlugin() {
+        return plugin;
+    }
 
     @Override
     public void handleCloseEvent(InventoryCloseEvent event) {
-
+        getPlugin().getGuiManager().unregisterGUI(this);
     }
 
     @Override
@@ -122,7 +149,11 @@ public abstract class BasicShopGUI extends BasicGUI implements ABSave {
         this.price.put(slot, price);
     }
 
-    public void removePricedItem(int slot) {
+    public void setItem(int slot, ItemStack itemStack) {
+        contents.put(slot, itemStack);
+    }
+
+    public void removeItem(int slot) {
         price.remove(slot);
         contents.remove(slot);
     }
@@ -146,18 +177,10 @@ public abstract class BasicShopGUI extends BasicGUI implements ABSave {
 
     @Override
     public @NotNull Map<String, Object> serialize() {
-        updateContents();
         return ABSave.super.serialize();
     }
 
-    private void updateContents() {
-        for (int i = 0; i < inventory.getSize(); i++) {
-            if (inventory.getItem(i) != null) {
-                contents.put(i, inventory.getItem(i));
-            }
-            else contents.remove(i);
-        }
-    }
+
 
     @Override
     public void handleDragEvent(InventoryDragEvent event) {

@@ -54,7 +54,13 @@ public abstract class ParentCommand extends InternalCommand {
 
         if (!parser.hasNext()) sendConfigErrorMessage(sender, "command-arguments-insufficient");
         else if ((subCommand = getSubCommand(parser.current())) == null) sendConfigErrorMessage(sender, "command-arguments-unknown", parser.next());
-        else return subCommand.execute(sender, args);
+        else {
+            if (!sender.hasPermission(subCommand.getAbsolutePermission())) {
+                sendConfigErrorMessage(sender, "permissions-insufficient", subCommand.getAbsolutePermission());
+                return false;
+            }
+            return subCommand.execute(sender, args);
+        }
         return false;
     }
 
