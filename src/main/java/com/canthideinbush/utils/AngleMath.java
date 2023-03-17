@@ -1,6 +1,8 @@
 package com.canthideinbush.utils;
 
+import org.bukkit.Bukkit;
 import org.bukkit.block.BlockFace;
+import org.bukkit.util.Vector;
 
 public class AngleMath {
 
@@ -42,5 +44,14 @@ public class AngleMath {
     public static double roundTo360(double angle) {
         return angle > 360 ? angle - 360 : angle < 0 ? 360 - angle : angle;
     }
+
+    public static Vector toParallel(Vector v, Vector to) {
+        double y = v.getY();
+        double angle = to.clone().setY(0).angle(v.setY(0));
+        double length = to.length();
+        double multiplier = length / Math.cos(angle);
+        return v.multiply(multiplier).setY(y);
+    }
+
 
 }

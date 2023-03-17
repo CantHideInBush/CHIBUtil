@@ -178,6 +178,22 @@ public class YAMLConfig extends YamlConfiguration {
 
     }
 
+    public static void registerSerializer(Class<?> type, Function<Object, String> serializer) {
+        if (serializers.containsKey(type)) {
+            throw new IllegalStateException("Given type is already registered");
+        }
+        serializers.put(type, serializer);
+    }
+
+    public static void registerDeserializer(Class<?> type, Function<String, Object> serializer) {
+        if (deserializers.containsKey(type)) {
+            throw new IllegalStateException("Given type is already registered");
+        }
+        deserializers.put(type, serializer);
+    }
+
+
+
     public YAMLConfig(CHIBPlugin plugin, String fileName) {
         this(plugin, fileName, false);
     }

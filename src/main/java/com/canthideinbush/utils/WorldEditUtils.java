@@ -4,20 +4,29 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats;
+import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.Vector3;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.regions.RegionOperationException;
 import com.sk89q.worldedit.session.ClipboardHolder;
+import com.sk89q.worldedit.world.block.BlockType;
+import com.sk89q.worldedit.world.block.BlockTypes;
+import net.minecraft.world.level.block.Block;
 import org.bukkit.Location;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.logging.Level;
 
 public class WorldEditUtils {
 
@@ -30,7 +39,6 @@ public class WorldEditUtils {
 
     public Clipboard findByName(String name) {
         File schemFile = new File(FileUtils.withDefaultParent(provider.getPlugin().getDataFolder(), provider.getPlugin().getConfig().getString("schematicsPath", "schematics")) + File.separator + name);
-        System.out.println(schemFile);
         ClipboardFormat format = ClipboardFormats.findByFile(schemFile);
         try {
             if (format != null) {
@@ -44,6 +52,10 @@ public class WorldEditUtils {
 
     public void pasteAt(Location location, String name) {
         Clipboard clipboard = findByName(name);
+        pasteAt(location, clipboard);
+    }
+
+    public void pasteAt(Location location, Clipboard clipboard) {
         EditSession session = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(location.getWorld()));
         Operation operation = new ClipboardHolder(clipboard).createPaste(session)
                 .to(BlockVector3.at(location.getBlockX(), location.getBlockY(), location.getBlockZ()))
@@ -55,6 +67,66 @@ public class WorldEditUtils {
         }
         session.close();
     }
+
+
+    public void inversePasteAt(Location location, String name) {
+        Clipboard clipboard = findByName(name);
+
+
+        BlockVector3 origin = clipboard.getMinimumPoint();
+        BlockVector3 dimensions = clipboard.getDimensions();
+        for (int x = origin.getX(); x < origin.getX() + dimensions.getX(); x++) {
+            for (int y = origin.getY(); y < origin.getY() + dimensions.getY(); y++) {
+                for (int z = origin.getZ(); z < origin.getZ() + dimensions.getZ(); z++) {
+                    BlockVector3 pos = BlockVector3.at(x, y, z);
+                    if (!clipboard.getBlock(pos).getBlockType().equals(BlockTypes.AIR)) {
+                        try {
+                            assert BlockTypes.AIR != null;
+                            clipboard.setBlock(pos, BlockTypes.AIR.getDefaultState());
+                        } catch (WorldEditException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
+        }
+
+        clipboard.commit();
+
+        EditSession session = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(location.getWorld()));
+        Operation operation = new ClipboardHolder(clipboard).createPaste(session)
+                .ignoreAirBlocks(false)
+                .to(BlockVector3.at(location.getBlockX(), location.getBlockY(), location.getBlockZ()))
+                .build();
+        try {
+            Operations.complete(operation);
+        } catch (WorldEditException e) {
+            e.printStackTrace();
+        }
+        session.close();
+    }
+
+    public Clipboard swapAt(Location location, String name) {
+        Clipboard clipboard = findByName(name);
+
+        BlockVector3 offset = clipboard.getRegion().getMinimumPoint().subtract(clipboard.getOrigin());
+        System.out.println(offset.toString());
+        CuboidRegion region = new CuboidRegion(
+                BlockVector3.at(location.getBlockX() - offset.getBlockX(),
+                        location.getBlockY() - offset.getBlockY(),
+                        location.getBlockZ() - offset.getBlockY()
+                        ),
+                clipboard.getDimensions().add(BukkitAdapter.adapt(location).toVector().toBlockPoint())
+                );
+        BlockArrayClipboard swapped = new BlockArrayClipboard(region);
+
+        pasteAt(location, clipboard);
+
+
+
+        return swapped;
+    }
+
 
 
 

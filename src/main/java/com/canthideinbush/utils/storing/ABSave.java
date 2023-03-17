@@ -43,9 +43,8 @@ public interface ABSave extends ConfigurationSerializable {
             if (f.isAnnotationPresent(YAMLElement.class)) {
                 f.setAccessible(true);
                 try {
-
                     if (map.containsKey(f.getName()))
-                    f.set(this, YAMLConfig.deserialize(f.getType(), map.get(f.getName())));
+                        f.set(this, YAMLConfig.deserialize(f.getType(), map.get(f.getName())));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
