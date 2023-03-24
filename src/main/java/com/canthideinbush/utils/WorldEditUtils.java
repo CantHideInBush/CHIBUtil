@@ -91,7 +91,6 @@ public class WorldEditUtils {
             }
         }
 
-        clipboard.commit();
 
         EditSession session = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(location.getWorld()));
         Operation operation = new ClipboardHolder(clipboard).createPaste(session)
@@ -110,15 +109,17 @@ public class WorldEditUtils {
         Clipboard clipboard = findByName(name);
 
         BlockVector3 offset = clipboard.getRegion().getMinimumPoint().subtract(clipboard.getOrigin());
-        System.out.println(offset.toString());
+        this.provider.getPlugin().getLogger().log(Level.INFO, offset.toString());
+        this.provider.getPlugin().getLogger().log(Level.INFO, clipboard.getDimensions().toString());
+
+        BlockVector3 newMin = BukkitAdapter.adapt(location).toVector().toBlockPoint().add(offset);
+
         CuboidRegion region = new CuboidRegion(
-                BlockVector3.at(location.getBlockX() - offset.getBlockX(),
-                        location.getBlockY() - offset.getBlockY(),
-                        location.getBlockZ() - offset.getBlockY()
-                        ),
-                clipboard.getDimensions().add(BukkitAdapter.adapt(location).toVector().toBlockPoint())
-                );
+                newMin,
+                BlockVector3.at(newMin.getBlockX() - 1, newMin.getBlockY() - 1, newMin.getBlockZ() - 1).add(clipboard.getDimensions()));
         BlockArrayClipboard swapped = new BlockArrayClipboard(region);
+        this.provider.getPlugin().getLogger().log(Level.INFO, swapped.getOrigin().toString());
+        this.provider.getPlugin().getLogger().log(Level.INFO, swapped.getRegion().getMaximumPoint().toString());
 
         pasteAt(location, clipboard);
 
