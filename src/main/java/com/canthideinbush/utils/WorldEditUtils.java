@@ -45,7 +45,7 @@ public class WorldEditUtils {
                 return format.getReader(new FileInputStream(schemFile)).read();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            provider.getPlugin().getLogger().log(Level.WARNING, "Schematic file " + name + " not found!");
         }
         return null;
     }
