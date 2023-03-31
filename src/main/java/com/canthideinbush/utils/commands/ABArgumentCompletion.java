@@ -40,12 +40,13 @@ public interface ABArgumentCompletion {
 
     default List<String> ABComplete(String[] args) {
         int index = args.length - getArgIndex() - 1;
-        System.out.println(index);
         if (index < 0 || getCompletion().size() <= index) return Collections.emptyList();
         HashMap<String, Method> map = getCompletion().get(index);
         if (!map.containsKey(args[args.length - 2])) return  Collections.emptyList();
         try {
-            return (List<String>) map.get(args[args.length - 2]).invoke(this);
+            Method method = map.get(args[args.length - 2]);
+            method.setAccessible(true);
+            return (List<String>) method.invoke(this);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
