@@ -22,9 +22,9 @@ public interface ABArgumentCompletion {
             if (method.isAnnotationPresent(ABCompleter.class)) {
                 ABCompleter completer = method.getAnnotation(ABCompleter.class);
                 HashMap<String, Method> map;
-                if (completion.size() < completer.index()) {
+                if (completion.size() <= completer.index()) {
                     map = new HashMap<>();
-                    completion.set(completer.index(), map);
+                    completion.add(map);
                 } else map = completion.get(completer.index());
                 map.put(completer.arg(), method);
             }

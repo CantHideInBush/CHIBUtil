@@ -6,3 +6,5 @@ description: Various utilities
 api-version: 1.18
 depend:
   - Vault
+  - WorldEdit
+  - WorldGuard
