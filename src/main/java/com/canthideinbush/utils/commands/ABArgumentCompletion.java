@@ -39,7 +39,8 @@ public interface ABArgumentCompletion {
     int getArgIndex();
 
     default List<String> ABComplete(String[] args) {
-        int index = args.length - getArgIndex() + 1;
+        int index = args.length - getArgIndex() - 1;
+        System.out.println(index);
         if (index < 0 || getCompletion().size() <= index) return Collections.emptyList();
         HashMap<String, Method> map = getCompletion().get(index);
         if (!map.containsKey(args[args.length - 2])) return  Collections.emptyList();
