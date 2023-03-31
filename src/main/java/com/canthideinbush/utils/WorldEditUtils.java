@@ -7,8 +7,10 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
@@ -24,25 +26,25 @@ import net.minecraft.world.level.block.Block;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.logging.Level;
 
 public class WorldEditUtils {
 
     private final UtilsProvider provider;
 
+
+    WorldEditPlugin worldEdit;
     public WorldEditUtils(UtilsProvider provider) {
         this.provider = provider;
+        worldEdit = (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
     }
 
 
 
 
     public Clipboard findByName(String name) {
-        File schemFile = new File(FileUtils.withDefaultParent(Bukkit.getPluginManager().getPlugin("WorldEdit").getDataFolder(), WorldEdit.getInstance().getConfiguration().saveDir) + File.separator + name);
+        File schemFile = new File(FileUtils.withDefaultParent(worldEdit.getDataFolder(), WorldEdit.getInstance().getConfiguration().saveDir) + File.separator + name);
         ClipboardFormat format = ClipboardFormats.findByFile(schemFile);
         try {
             if (format != null) {
@@ -133,6 +135,18 @@ public class WorldEditUtils {
 
 
         return swapped;
+    }
+
+
+    public void saveClipboard(Clipboard clipboard, String name) {
+        File file = FileUtils.withDefaultParent(worldEdit.getDataFolder(), WorldEdit.getInstance().getConfiguration().saveDir + File.separator + name);
+
+        try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_V3_SCHEMATIC.getWriter(new FileOutputStream(file))) {
+            writer.write(clipboard);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
 
