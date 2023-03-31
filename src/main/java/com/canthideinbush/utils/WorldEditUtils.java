@@ -4,6 +4,7 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
@@ -20,6 +21,7 @@ import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.block.BlockTypes;
 import net.minecraft.world.level.block.Block;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import java.io.File;
@@ -37,8 +39,10 @@ public class WorldEditUtils {
     }
 
 
+
+
     public Clipboard findByName(String name) {
-        File schemFile = new File(FileUtils.withDefaultParent(provider.getPlugin().getDataFolder(), provider.getPlugin().getConfig().getString("schematicsPath", "schematics")) + File.separator + name);
+        File schemFile = new File(FileUtils.withDefaultParent(Bukkit.getPluginManager().getPlugin("WorldEdit").getDataFolder(), WorldEdit.getInstance().getConfiguration().saveDir) + File.separator + name);
         ClipboardFormat format = ClipboardFormats.findByFile(schemFile);
         try {
             if (format != null) {
@@ -49,6 +53,8 @@ public class WorldEditUtils {
         }
         return null;
     }
+
+
 
 
     public void pasteAt(Location location, String name) {
