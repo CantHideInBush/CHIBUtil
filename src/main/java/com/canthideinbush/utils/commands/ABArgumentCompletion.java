@@ -42,7 +42,7 @@ public interface ABArgumentCompletion {
         int index = args.length - getArgIndex() + 1;
         if (index < 0 || getCompletion().size() <= index) return Collections.emptyList();
         HashMap<String, Method> map = getCompletion().get(index);
-        if (!map.containsKey(args[args.length - 1])) return  Collections.emptyList();
+        if (!map.containsKey(args[args.length - 2])) return  Collections.emptyList();
         try {
             return (List<String>) map.get(args[args.length - 2]).invoke(this);
         } catch (IllegalAccessException | InvocationTargetException e) {
