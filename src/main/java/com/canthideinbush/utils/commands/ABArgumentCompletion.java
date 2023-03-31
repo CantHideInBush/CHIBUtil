@@ -44,7 +44,7 @@ public interface ABArgumentCompletion {
         HashMap<String, Method> map = getCompletion().get(index);
         if (!map.containsKey(args[args.length - 1])) return  Collections.emptyList();
         try {
-            return (List<String>) map.get(args[args.length - 1]).invoke(this);
+            return (List<String>) map.get(args[args.length - 2]).invoke(this);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
