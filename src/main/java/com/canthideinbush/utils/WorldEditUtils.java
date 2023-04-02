@@ -118,20 +118,27 @@ public class WorldEditUtils {
         Clipboard clipboard = findByName(name);
 
         BlockVector3 offset = clipboard.getRegion().getMinimumPoint().subtract(clipboard.getOrigin());
-        this.provider.getPlugin().getLogger().log(Level.INFO, offset.toString());
-        this.provider.getPlugin().getLogger().log(Level.INFO, clipboard.getDimensions().toString());
 
-        BlockVector3 newMin = BukkitAdapter.adapt(location).toVector().toBlockPoint().add(offset);
+        BlockVector3 vectorLocation = BukkitAdapter.adapt(location).toVector().toBlockPoint();
+
+        BlockVector3 newMin = vectorLocation.add(offset);
+
+
 
         CuboidRegion region = new CuboidRegion(
                 newMin,
                 BlockVector3.at(newMin.getBlockX() - 1, newMin.getBlockY() - 1, newMin.getBlockZ() - 1).add(clipboard.getDimensions()));
         BlockArrayClipboard swapped = new BlockArrayClipboard(region);
-        this.provider.getPlugin().getLogger().log(Level.INFO, swapped.getOrigin().toString());
-        this.provider.getPlugin().getLogger().log(Level.INFO, swapped.getRegion().getMaximumPoint().toString());
+        swapped.setOrigin(vectorLocation);
+        ForwardExtentCopy copy = new ForwardExtentCopy(BukkitAdapter.adapt(location.getWorld()), region, swapped, newMin);
+
+        try {
+            Operations.complete(copy);
+        } catch (WorldEditException e) {
+            throw new RuntimeException(e);
+        }
 
         pasteAt(location, clipboard);
-
 
 
         return swapped;
@@ -141,7 +148,7 @@ public class WorldEditUtils {
     public void saveClipboard(Clipboard clipboard, String name) {
         File file = FileUtils.withDefaultParent(worldEdit.getDataFolder(), WorldEdit.getInstance().getConfiguration().saveDir + File.separator + name);
 
-        try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_V3_SCHEMATIC.getWriter(new FileOutputStream(file))) {
+        try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_SCHEMATIC.getWriter(new FileOutputStream(file))) {
             writer.write(clipboard);
         } catch (IOException e) {
             throw new RuntimeException(e);
