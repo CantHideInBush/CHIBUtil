@@ -44,7 +44,18 @@ public class WorldEditUtils {
 
 
     public Clipboard findByName(String name) {
-        File schemFile = new File(FileUtils.withDefaultParent(worldEdit.getDataFolder(), WorldEdit.getInstance().getConfiguration().saveDir) + File.separator + name);
+        return findByName(name, true);
+    }
+
+
+    public Clipboard findByName(String name, boolean useWorldEdit) {
+        File schemFile;
+        if (useWorldEdit) {
+            schemFile = new File(FileUtils.withDefaultParent(worldEdit.getDataFolder(), WorldEdit.getInstance().getConfiguration().saveDir) + File.separator + name);
+        }
+        else schemFile = new File(name);
+
+
         ClipboardFormat format = ClipboardFormats.findByFile(schemFile);
         try {
             if (format != null) {
@@ -57,10 +68,12 @@ public class WorldEditUtils {
     }
 
 
-
-
     public void pasteAt(Location location, String name) {
-        Clipboard clipboard = findByName(name);
+        pasteAt(location, name, true);
+    }
+
+    public void pasteAt(Location location, String name, boolean useWorldEdit) {
+        Clipboard clipboard = findByName(name, useWorldEdit);
         pasteAt(location, clipboard);
     }
 
@@ -146,10 +159,20 @@ public class WorldEditUtils {
 
 
     public void saveClipboard(Clipboard clipboard, String name) {
-        File file = FileUtils.withDefaultParent(worldEdit.getDataFolder(), WorldEdit.getInstance().getConfiguration().saveDir + File.separator + name);
+        saveClipboard(clipboard, name, true);
+    }
 
-        try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_SCHEMATIC.getWriter(new FileOutputStream(file))) {
+    public void saveClipboard(Clipboard clipboard, String name, boolean useWorldEdit) {
+        File file;
+        if (useWorldEdit) {
+            file = FileUtils.withDefaultParent(worldEdit.getDataFolder(), WorldEdit.getInstance().getConfiguration().saveDir + File.separator + name);
+        }
+        else file = new File(name);
+        try {
+            file.createNewFile();
+            ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_SCHEMATIC.getWriter(new FileOutputStream(file));
             writer.write(clipboard);
+            writer.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

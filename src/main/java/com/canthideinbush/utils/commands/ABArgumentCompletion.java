@@ -29,12 +29,13 @@ public interface ABArgumentCompletion {
                     map = new HashMap<>();
                     completion.add(map);
                 } else map = completion.get(completer.index());
+                Object inst = this;
                 map.put(completer.arg(), new Supplier<>() {
                     @Override
                     public List<String> get() {
                         method.setAccessible(true);
                         try {
-                            return (List<String>) method.invoke(this);
+                            return (List<String>) method.invoke(inst);
                         } catch (IllegalAccessException | InvocationTargetException e) {
                             throw new RuntimeException(e);
                         }
