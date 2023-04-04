@@ -1,5 +1,6 @@
 package com.canthideinbush.utils;
 
+import com.canthideinbush.utils.commands.DefaultConfigMessage;
 import com.canthideinbush.utils.gui.shop.BasicShopGUI;
 import com.canthideinbush.utils.storing.items.AxolotlBucketValues;
 import com.canthideinbush.utils.storing.items.HRItem;

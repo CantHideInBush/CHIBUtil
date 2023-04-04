@@ -3,10 +3,9 @@ package com.canthideinbush.utils.commands;
 import com.canthideinbush.utils.CHIBPlugin;
 import com.canthideinbush.utils.Reflector;
 import com.canthideinbush.utils.UtilsProvider;
-import com.canthideinbush.utils.chat.ChatUtils;
 import com.canthideinbush.utils.managers.Keyed;
 import com.canthideinbush.utils.storing.ArgParser;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import com.canthideinbush.utils.storing.YAMLConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -17,12 +16,13 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.checkerframework.checker.units.qual.C;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,14 +33,17 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
 
     public InternalCommand() {
         register(this.getPlugin());
+        saveDefaultConfigMessages();
     }
 
     public InternalCommand(CHIBPlugin plugin) {
         this.register(plugin);
+        saveDefaultConfigMessages();
     }
 
     public InternalCommand(CHIBPlugin plugin, String name) {
         this.register(plugin, name);
+        saveDefaultConfigMessages();
     }
 
     public abstract String getName();
@@ -188,6 +191,31 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
         ArrayList<String> tabArgs = new ArrayList<>(List.of(args));
         tabArgs.add(0, command);
         return c.complete(tabArgs.toArray(new String[]{}));
+    }
+
+    public String getMessagesPath() {
+        if (getParentCommand() != null) {
+            return getParentCommand().getMessagesPath() + "." + getName();
+        }
+        else return "command." + getName();
+    }
+
+    public void saveDefaultConfigMessages() {
+        YAMLConfig config = this.getPlugin().getMessageConfig();
+        for (Method method : this.getClass().getMethods()) {
+            if (method.isAnnotationPresent(DefaultConfigMessage.class)) {
+                DefaultConfigMessage dcm = method.getAnnotation(DefaultConfigMessage.class);
+                try {
+                    config.set(getMessagesPath() + "." + dcm.forN(), method.invoke(this).toString());
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
+    public String getMessagePath(String message) {
+        return getMessagesPath() + "." + message;
     }
 
 }
