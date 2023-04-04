@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -119,11 +120,17 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
         getUtilsProvider().getChatUtils().sendMessage(sender, getUtilsProvider().chat.getMessage(path).formatted(args), ChatColor.GREEN);
     }
 
-    public abstract List<String> complete(String[] args);
+    public List<String> complete(String[] args) {
+        return Collections.emptyList();
+    }
+
+    public List<String> complete(String[] args, CommandSender sender) {
+        return  complete(args);
+    }
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        return complete(args);
+        return complete(args, commandSender);
     }
 
     @Override
@@ -200,15 +207,19 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
         else return "command." + getName();
     }
 
-    public void saveDefaultConfigMessages() {
+    protected void saveDefaultConfigMessages() {
         YAMLConfig config = this.getPlugin().getMessageConfig();
-        for (Method method : this.getClass().getMethods()) {
-            if (method.isAnnotationPresent(DefaultConfigMessage.class)) {
-                DefaultConfigMessage dcm = method.getAnnotation(DefaultConfigMessage.class);
-                try {
-                    config.set(getMessagesPath() + "." + dcm.forN(), method.invoke(this).toString());
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new RuntimeException(e);
+        for (Field field : this.getClass().getDeclaredFields()) {
+            if (field.isAnnotationPresent(DefaultConfigMessage.class)) {
+                field.setAccessible(true);
+                DefaultConfigMessage dcm = field.getAnnotation(DefaultConfigMessage.class);
+                String path = getMessagesPath() + "." + dcm.forN();
+                if (!config.isSet(path)) {
+                    try {
+                        config.set(path, field.get(this).toString());
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }
