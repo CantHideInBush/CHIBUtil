@@ -125,7 +125,7 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
     }
 
     public List<String> complete(String[] args, CommandSender sender) {
-        return  complete(args);
+        return complete(args);
     }
 
     @Override

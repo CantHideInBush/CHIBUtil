@@ -7,10 +7,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -61,7 +58,7 @@ public interface ABArgumentCompletion {
 
     default TabCompleter findCompleter(CommandSender sender, int index, String arg) {
         return getCompletion().stream().filter(tabCompleter ->
-                sender.hasPermission(tabCompleter.getPermission()) && tabCompleter.getIndex() == index && tabCompleter.getArg().equalsIgnoreCase(arg)).findAny().orElse(null);
+                (Objects.equals(tabCompleter.getPermission(), "") || sender.hasPermission(tabCompleter.getPermission())) && tabCompleter.getIndex() == index && tabCompleter.getArg().equalsIgnoreCase(arg)).findAny().orElse(null);
     }
 
 
