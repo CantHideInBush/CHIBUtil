@@ -11,7 +11,7 @@ public @interface ABCompleter {
 
     int index();
 
-    String arg();
+    String arg() default "";
 
     String permission() default "";
 }

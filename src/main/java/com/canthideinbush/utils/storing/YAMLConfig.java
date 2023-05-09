@@ -3,6 +3,7 @@ package com.canthideinbush.utils.storing;
 import com.canthideinbush.utils.CHIBPlugin;
 import com.canthideinbush.utils.CHIBUtils;
 import com.canthideinbush.utils.Reflector;
+import com.canthideinbush.utils.UtilsProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class YAMLConfig extends YamlConfiguration {
@@ -35,11 +37,18 @@ public class YAMLConfig extends YamlConfiguration {
     static {
 
         //Location
-        serializers.put(Location.class, location -> { Location l = (Location) location; return String.format("%s;%s;%s;%s;%s;%s", l.getWorld().getName(), l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch()); });
+        serializers.put(Location.class, location -> { Location l = (Location) location; return String.format("%s;%s;%s;%s;%s;%s", l.getWorld() != null ? l.getWorld().getName() : "null", l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch()); });
         deserializers.put(Location.class, string -> {
             String[] split = string.split(";");
             ArgParser parser = new ArgParser(split);
-            return new Location(parser.nextWorld(), parser.nextDouble(), parser.nextDouble(), parser.nextDouble(), parser.nextFloat(), parser.nextFloat());
+            World world;
+            if (parser.current().equals("null")) {
+                world = null;
+                parser.next();
+            }
+            else world = parser.nextWorld();
+
+            return new Location(world, parser.nextDouble(), parser.nextDouble(), parser.nextDouble(), parser.nextFloat(), parser.nextFloat());
         });
 
 
@@ -110,12 +119,28 @@ public class YAMLConfig extends YamlConfiguration {
         return (Collection<T>) collection;
     }
 
+
     public static <T> T deserialize(Class<T> t, Object data) {
         if (Collection.class.isAssignableFrom(t)) {
             return (T) deserializeCollection(t, (Collection<Object>) data);
         }
         if (data instanceof String && deserializers.containsKey(t)) {
             return (T) deserializers.get(t).apply((String) data);
+        }
+        return (T) data;
+    }
+
+    public static <T> T deserialize(Class<T> t, String name, Object data) {
+        try {
+            if (Collection.class.isAssignableFrom(t)) {
+                return (T) deserializeCollection(t, (Collection<Object>) data);
+            }
+            if (data instanceof String && deserializers.containsKey(t)) {
+                return (T) deserializers.get(t).apply((String) data);
+            }
+        } catch (Exception e) {
+            CHIBUtils.getInstance().getLogger().log(Level.WARNING, "Deserialization error occured for field " + name);
+            throw e;
         }
         return (T) data;
     }

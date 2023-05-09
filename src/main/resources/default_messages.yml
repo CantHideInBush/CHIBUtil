@@ -8,6 +8,7 @@ common:
   purchase-successful: "Zakupiles przedmiot! Nowy balans: %s"
 
 incorrect_data_type: "Niepoprawny typ danych"
+must-be-positive: "Wartosc musi byc dodatnia!"
 
 command-arguments-insufficient: "Nie podano wystarczajacej ilosci argumentow!"
 command-arguments-unknown: "Nie odnaleziono argumentu &e'%s'"

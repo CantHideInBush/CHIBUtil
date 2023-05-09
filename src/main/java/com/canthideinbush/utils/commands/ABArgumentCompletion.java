@@ -1,5 +1,6 @@
 package com.canthideinbush.utils.commands;
 
+import com.canthideinbush.utils.CHIBUtils;
 import org.bukkit.command.CommandSender;
 
 import java.lang.annotation.Annotation;
@@ -10,6 +11,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 
 public interface ABArgumentCompletion {
 
@@ -20,11 +22,12 @@ public interface ABArgumentCompletion {
     default List<TabCompleter> prepareCompletion() {
         List<TabCompleter> completion = new ArrayList<>();
         ABCompleter completer;
+        Object inst = this;
         for (Method method : this.getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(ABCompleter.class)) {
                 completer = method.getAnnotation(ABCompleter.class);
 
-                Object inst = this;
+
                 completion.add(new TabCompleter(completer.index(), completer.arg(), () -> {
                     method.setAccessible(true);
                     try {
@@ -43,7 +46,7 @@ public interface ABArgumentCompletion {
                     @Override
                     public List<String> get() {
                         try {
-                            return Collections.singletonList(field.get(this).toString());
+                            return Collections.singletonList(field.get(inst).toString());
                         } catch (IllegalAccessException e) {
                             throw new RuntimeException(e);
                         }
@@ -58,7 +61,7 @@ public interface ABArgumentCompletion {
 
     default TabCompleter findCompleter(CommandSender sender, int index, String arg) {
         return getCompletion().stream().filter(tabCompleter ->
-                (Objects.equals(tabCompleter.getPermission(), "") || sender.hasPermission(tabCompleter.getPermission())) && tabCompleter.getIndex() == index && tabCompleter.getArg().equalsIgnoreCase(arg)).findAny().orElse(null);
+                (Objects.equals(tabCompleter.getPermission(), "") || sender.hasPermission(tabCompleter.getPermission())) && tabCompleter.getIndex() == index && (tabCompleter.getArg().equalsIgnoreCase("") || tabCompleter.getArg().equalsIgnoreCase(arg))).findAny().orElse(null);
     }
 
 

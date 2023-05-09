@@ -74,13 +74,13 @@ public abstract class ParentCommand extends InternalCommand {
     }
 
     @Override
-    public List<String> complete(String[] args) {
+    public List<String> complete(String[] args, CommandSender sender) {
         InternalCommand subCommand;
         if (args.length == getArgIndex() + getArgCount()) {
             return getSubcommands().stream().map(InternalCommand::getName).collect(Collectors.toList());
         }
         else if ((subCommand = getSubCommand(args[getArgIndex() + getArgCount() - 1])) != null) {
-            return subCommand.complete(args);
+            return subCommand.complete(args, sender);
         }
         return Collections.emptyList();
     }
