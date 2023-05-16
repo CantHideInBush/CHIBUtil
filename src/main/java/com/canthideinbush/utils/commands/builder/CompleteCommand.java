@@ -41,7 +41,7 @@ public abstract class CompleteCommand<T> extends InternalCommand {
         return true;
     }
 
-    abstract void complete(T object);
+    protected abstract void complete(T object);
 
     @DefaultConfigMessage(forN = "not-complete")
     private static final String NOT_COMPLETE = "Brakujace opcje: ";
