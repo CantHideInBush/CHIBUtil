@@ -11,7 +11,10 @@ public abstract class BuilderCommand<S, T extends ObjectBuilder<S>> extends Pare
 
     private final HashMap<CommandSender, T> data = new HashMap<>();
 
-    public abstract void complete(CommandSender sender, Consumer<S> consumer);
+    public void complete(CommandSender sender, Consumer<S> consumer) {
+        data.remove(sender);
+        consumer.accept(getBuilder(sender).build());
+    }
 
     public void setBuilder(CommandSender player, ObjectBuilder<?> builder) {
         data.put(player, (T) builder);
