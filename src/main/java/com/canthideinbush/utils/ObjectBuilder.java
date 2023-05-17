@@ -17,8 +17,6 @@ public interface ObjectBuilder<T> {
 
     void with(String option, String value);
 
-    void withId(String id);
-
     List<String> missingOptions();
 
     boolean isComplete();

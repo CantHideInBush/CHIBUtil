@@ -6,10 +6,10 @@ import com.canthideinbush.utils.commands.InternalCommand;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-public abstract class CompleteCommand<T> extends InternalCommand {
+public abstract class CompleteCommand extends InternalCommand {
 
-    private final BuilderCommand<T, ?> parent;
-    public CompleteCommand(BuilderCommand<T, ?> parent) {
+    private final BuilderCommand<?, ?> parent;
+    public CompleteCommand(BuilderCommand<?, ?> parent) {
         this.parent = parent;
     }
 
@@ -35,19 +35,17 @@ public abstract class CompleteCommand<T> extends InternalCommand {
             return false;
         }
 
-        parent.complete(sender, this::complete);
+        parent.complete(sender);
         sendConfigSuccessMessage(sender, getMessagePath("success"));
 
         return true;
     }
 
-    protected abstract void complete(T object);
-
     @DefaultConfigMessage(forN = "not-complete")
-    private static final String NOT_COMPLETE = "Brakujace opcje: ";
+    private final String NOT_COMPLETE = "Brakujace opcje: ";
 
     @DefaultConfigMessage(forN = "success")
-    private static final String SUCCESS = "Utworzono nowy generator!";
+    private final String SUCCESS = "Utworzono nowy generator!";
 
     @Override
     public String getName() {

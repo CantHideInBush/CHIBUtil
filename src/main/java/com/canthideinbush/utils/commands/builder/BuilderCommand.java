@@ -1,6 +1,7 @@
 package com.canthideinbush.utils.commands.builder;
 
 import com.canthideinbush.utils.ObjectBuilder;
+import com.canthideinbush.utils.commands.InternalCommand;
 import com.canthideinbush.utils.commands.ParentCommand;
 import org.bukkit.command.CommandSender;
 
@@ -11,10 +12,47 @@ public abstract class BuilderCommand<S, T extends ObjectBuilder<S>> extends Pare
 
     private final HashMap<CommandSender, T> data = new HashMap<>();
 
-    public void complete(CommandSender sender, Consumer<S> consumer) {
-        data.remove(sender);
-        consumer.accept(getBuilder(sender).build());
+    public BuilderCommand() {
+
     }
+
+    public void defaultConstructor() {
+        BuilderCommand<S, T> instance = this;
+        subCommands.add(new StartCommand(this) {
+            @Override
+            public Class<? extends InternalCommand> getParentCommandClass() {
+                return instance.getClass();
+            }
+        });
+        subCommands.add(new WithCommand(this) {
+            @Override
+            public Class<? extends InternalCommand> getParentCommandClass() {
+                return instance.getClass();
+            }
+        });
+
+        subCommands.add(new CompleteCommand(this) {
+
+            @Override
+            public Class<? extends InternalCommand> getParentCommandClass() {
+                return instance.getClass();
+            }
+        });
+
+
+
+    }
+
+
+    public abstract HashMap<String, Class<? extends ObjectBuilder<?>>> builders();
+
+
+    public void complete(CommandSender sender) {
+        data.remove(sender);
+        completeAction(getBuilder(sender).build());
+    }
+
+    protected abstract void completeAction(S object);
 
     public void setBuilder(CommandSender player, ObjectBuilder<?> builder) {
         data.put(player, (T) builder);
@@ -28,4 +66,8 @@ public abstract class BuilderCommand<S, T extends ObjectBuilder<S>> extends Pare
         return data.containsKey(player);
     }
 
+    @Override
+    public String getName() {
+        return "build";
+    }
 }

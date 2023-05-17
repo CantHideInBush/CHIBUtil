@@ -22,7 +22,6 @@ public abstract class StartCommand extends InternalCommand{
         this.parent = parent;
     }
 
-    public abstract HashMap<String, Class<? extends ObjectBuilder<?>>> builders();
 
     @Override
     public boolean execute(Player sender, String[] args) {
@@ -46,10 +45,10 @@ public abstract class StartCommand extends InternalCommand{
     }
 
     @DefaultConfigMessage(forN = "unknown-builder")
-    private static final String UNKNOWN_BUILDER = "Nie mozna odnalezc tego typu generatora!";
+    private final String UNKNOWN_BUILDER = "Nie mozna odnalezc tego typu generatora!";
 
     @DefaultConfigMessage(forN = "success")
-    private static final String SUCCESS = "Rozpoczeto tworzenie generatora!";
+    private final String SUCCESS = "Rozpoczeto tworzenie generatora!";
 
     @Override
     public String getName() {
@@ -59,13 +58,13 @@ public abstract class StartCommand extends InternalCommand{
     @Override
     public List<String> complete(String[] args, CommandSender sender) {
         if (args.length == getArgIndex() + 1) {
-            return new ArrayList<>(builders().keySet());
+            return new ArrayList<>(parent.builders().keySet());
         }
         return Collections.emptyList();
     }
 
     public ObjectBuilder<?> fromName(String name) {
-        if (!builders().containsKey(name)) return null;
-        return Reflector.newInstance(builders().get(name), new Class[]{});
+        if (!parent.builders().containsKey(name)) return null;
+        return Reflector.newInstance(parent.builders().get(name), new Class[]{});
     }
 }
