@@ -78,6 +78,10 @@ public abstract class WithCommand extends InternalCommand {
                 String option = args[getArgIndex()];
                 return builder.complete(sender, option);
             }
+            else if (args.length == getArgIndex() + 3) {
+                String value = args[getArgIndex() + 1];
+                return builder.completeValue(sender, value);
+            }
         }
 
 

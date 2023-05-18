@@ -7,6 +7,7 @@ import org.bukkit.configuration.serialization.SerializableAs;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -69,6 +70,17 @@ public class ChanceMap<T> implements ABSave  {
         return null;
     }
 
+    public boolean isEmpty() {
+        return chanceMap.isEmpty();
+    }
+
+    public boolean contains(T object) {
+        return chanceMap.containsKey(object);
+    }
+
+    public Set<T> getKeys() {
+        return chanceMap.keySet();
+    }
 
     @Override
     public String toString() {
