@@ -15,14 +15,12 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -135,7 +133,7 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
 
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        if (!commandSender.hasPermission(getAbsolutePermission())) {
+        if (!hasPermission(commandSender, getAbsolutePermission())) {
             sendConfigErrorMessage(commandSender, "permissions-insufficient", getAbsolutePermission());
             return false;
         }
@@ -146,34 +144,47 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
         return 1;
     }
 
+    public  boolean hasPermission(CommandSender sender, String permission) {
+        if (sender.hasPermission(permission)) return true;
+        Permission p;
+        if ((p = Bukkit.getPluginManager().getPermission(permission)) != null) {
+            for (String p1 : p.getChildren().keySet()) {
+                if (hasPermission(sender, p1))
+                    return true;
+            }
+        }
+        return false;
+    }
+
 
 
 
 
 
     public void register(CHIBPlugin plugin) {
-        CHIBCommandsRegistry.instance.register(this);
-        if (getParentCommand() == null) {
-            PluginCommand pluginCommand = Reflector.newInstance(PluginCommand.class, new Class[]{String.class, Plugin.class}, this.getName(), plugin);
-            assert pluginCommand != null;
-            pluginCommand.setExecutor(this);
-            pluginCommand.setTabCompleter(this);
-            //pluginCommand.setPermission(this.getAbsolutePermission());
-            //pluginCommand.permissionMessage(LegacyComponentSerializer.legacyAmpersand().deserialize());
-            Bukkit.getCommandMap().register(this.getName(), pluginCommand);
-        }
+        register(plugin, this.getName());
     }
 
     public void register(CHIBPlugin plugin, String name) {
         CHIBCommandsRegistry.instance.register(this);
+        Permission permission = new Permission(getAbsolutePermission());
         if (getParentCommand() == null) {
             PluginCommand pluginCommand = Reflector.newInstance(PluginCommand.class, new Class[]{String.class, Plugin.class}, name, plugin);
             assert pluginCommand != null;
             pluginCommand.setExecutor(this);
             pluginCommand.setTabCompleter(this);
-            //pluginCommand.setPermission(this.getAbsolutePermission());
-            //pluginCommand.permissionMessage(LegacyComponentSerializer.legacyAmpersand().deserialize());
             Bukkit.getCommandMap().register(name, pluginCommand);
+        }
+        else {
+            permission.addParent(Bukkit.getPluginManager().getPermission(getParentCommand().getAbsolutePermission()), true);
+        }
+
+
+        Bukkit.getPluginManager().addPermission(permission);
+
+
+        for (Permission additional : getAdditionalPermissions()) {
+            Bukkit.getPluginManager().addPermission(additional);
         }
     }
 
@@ -227,6 +238,10 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
 
     public String getMessagePath(String message) {
         return getMessagesPath() + "." + message;
+    }
+
+    protected List<Permission> getAdditionalPermissions() {
+        return Collections.emptyList();
     }
 
 }

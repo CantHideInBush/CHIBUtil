@@ -14,4 +14,7 @@ public @interface ABCompleter {
     String arg() default "";
 
     String permission() default "";
+
+
+    String localPermission() default "";
 }

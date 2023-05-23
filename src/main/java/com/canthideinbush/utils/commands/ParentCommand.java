@@ -55,7 +55,7 @@ public abstract class ParentCommand extends InternalCommand {
         if (!parser.hasNext()) sendConfigErrorMessage(sender, "command-arguments-insufficient");
         else if ((subCommand = getSubCommand(parser.current())) == null) sendConfigErrorMessage(sender, "command-arguments-unknown", parser.next());
         else {
-            if (!sender.hasPermission(subCommand.getAbsolutePermission())) {
+            if (!hasPermission(sender, subCommand.getAbsolutePermission())) {
                 sendConfigErrorMessage(sender, "permissions-insufficient", subCommand.getAbsolutePermission());
                 return false;
             }
@@ -77,7 +77,7 @@ public abstract class ParentCommand extends InternalCommand {
     public List<String> complete(String[] args, CommandSender sender) {
         InternalCommand subCommand;
         if (args.length == getArgIndex() + getArgCount()) {
-            return getSubcommands().stream().map(InternalCommand::getName).collect(Collectors.toList());
+            return getSubcommands().stream().filter(command -> command.hasPermission(sender, command.getAbsolutePermission())).map(InternalCommand::getName).collect(Collectors.toList());
         }
         else if ((subCommand = getSubCommand(args[getArgIndex() + getArgCount() - 1])) != null) {
             return subCommand.complete(args, sender);

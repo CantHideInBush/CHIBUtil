@@ -10,17 +10,29 @@ public class TabCompleter {
     private final Supplier<List<String>> supplier;
     private final String permission;
 
+    private final String localPermission;
+
     public TabCompleter(int index, String arg, Supplier<List<String>> supplier) {
         this.arg = arg;
         this.index = index;
         this.supplier = supplier;
         this.permission = null;
+        this.localPermission = null;
     }
     public TabCompleter(int index, String arg, Supplier<List<String>> supplier, String permission) {
         this.arg = arg;
         this.index = index;
         this.supplier = supplier;
         this.permission = permission;
+        this.localPermission = null;
+    }
+
+    public TabCompleter(int index, String arg, Supplier<List<String>> supplier, String permission, String localPermission) {
+        this.arg = arg;
+        this.index = index;
+        this.supplier = supplier;
+        this.permission = permission;
+        this.localPermission = localPermission;
     }
 
     public String getArg() {
@@ -37,5 +49,9 @@ public class TabCompleter {
 
     public Supplier<List<String>> getSupplier() {
         return supplier;
+    }
+
+    public String getLocalPermission() {
+        return localPermission;
     }
 }
