@@ -1,25 +1,26 @@
 package com.canthideinbush.utils.commands;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class TabCompleter {
 
     private final String arg;
     private final int index;
-    private final Supplier<List<String>> supplier;
+    private final Function<String[], List<String>> supplier;
     private final String permission;
 
     private final String localPermission;
 
-    public TabCompleter(int index, String arg, Supplier<List<String>> supplier) {
+    public TabCompleter(int index, String arg, Function<String[], List<String>> supplier) {
         this.arg = arg;
         this.index = index;
         this.supplier = supplier;
         this.permission = null;
         this.localPermission = null;
     }
-    public TabCompleter(int index, String arg, Supplier<List<String>> supplier, String permission) {
+    public TabCompleter(int index, String arg, Function<String[], List<String>> supplier, String permission) {
         this.arg = arg;
         this.index = index;
         this.supplier = supplier;
@@ -27,7 +28,7 @@ public class TabCompleter {
         this.localPermission = null;
     }
 
-    public TabCompleter(int index, String arg, Supplier<List<String>> supplier, String permission, String localPermission) {
+    public TabCompleter(int index, String arg, Function<String[], List<String>> supplier, String permission, String localPermission) {
         this.arg = arg;
         this.index = index;
         this.supplier = supplier;
@@ -47,7 +48,7 @@ public class TabCompleter {
         return permission;
     }
 
-    public Supplier<List<String>> getSupplier() {
+    public Function<String[], List<String>> getSupplier() {
         return supplier;
     }
 

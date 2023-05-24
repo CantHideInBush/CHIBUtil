@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface ABArgumentCompletion {
@@ -23,10 +24,12 @@ public interface ABArgumentCompletion {
                 completer = method.getAnnotation(ABCompleter.class);
 
 
-                completion.add(new TabCompleter(completer.index(), completer.arg(), () -> {
+                completion.add(new TabCompleter(completer.index(), completer.arg(), (args) -> {
                     method.setAccessible(true);
                     try {
-                        return (List<String>) method.invoke(inst);
+                        if (method.getTypeParameters().length > 0)
+                        return (List<String>) method.invoke(inst, args);
+                        else return (List<String>) method.invoke(inst);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         throw new RuntimeException(e);
                     }
@@ -37,9 +40,9 @@ public interface ABArgumentCompletion {
             if (field.isAnnotationPresent(ABCompleter.class)) {
                 completer = field.getAnnotation(ABCompleter.class);
                 field.setAccessible(true);
-                completion.add(new TabCompleter(completer.index(), completer.arg(), new Supplier<>() {
+                completion.add(new TabCompleter(completer.index(), completer.arg(), new Function<String[], List<String>>() {
                     @Override
-                    public List<String> get() {
+                    public List<String> apply(String[] args) {
                         try {
                             return Collections.singletonList(field.get(inst).toString());
                         } catch (IllegalAccessException e) {
@@ -75,7 +78,7 @@ public interface ABArgumentCompletion {
         if (index < 0 || getCompletion().size() <= index) return Collections.emptyList();
         TabCompleter completer = findCompleter(sender, index, args[args.length - 2]);
         if (completer == null) return  Collections.emptyList();
-        return completer.getSupplier().get();
+        return completer.getSupplier().apply(args);
     }
 
 
