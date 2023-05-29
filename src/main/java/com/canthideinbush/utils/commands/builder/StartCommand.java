@@ -20,6 +20,7 @@ public abstract class StartCommand extends InternalCommand{
 
     public StartCommand(BuilderCommand<?, ?> parent) {
         this.parent = parent;
+        saveDefaultConfigMessages();
     }
 
 
@@ -45,10 +46,10 @@ public abstract class StartCommand extends InternalCommand{
     }
 
     @DefaultConfigMessage(forN = "unknown-builder")
-    private final String UNKNOWN_BUILDER = "Nie mozna odnalezc tego typu generatora!";
+    protected final String UNKNOWN_BUILDER = "Nie mozna odnalezc tego typu generatora!";
 
     @DefaultConfigMessage(forN = "success")
-    private final String SUCCESS = "Rozpoczeto tworzenie generatora!";
+    protected final String SUCCESS = "Rozpoczeto tworzenie generatora!";
 
     @Override
     public String getName() {

@@ -48,8 +48,9 @@ public abstract class BuilderCommand<S, T extends ObjectBuilder<S>> extends Pare
 
 
     public void complete(CommandSender sender) {
-        data.remove(sender);
         completeAction(getBuilder(sender).build());
+        data.remove(sender);
+
     }
 
     protected abstract void completeAction(S object);

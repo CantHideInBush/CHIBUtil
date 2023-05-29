@@ -16,6 +16,7 @@ public abstract class WithCommand extends InternalCommand {
     private final BuilderCommand<?, ?> parent;
     public WithCommand(BuilderCommand<?, ?> parent) {
         this.parent = parent;
+        saveDefaultConfigMessages();
     }
 
     @Override
@@ -89,13 +90,13 @@ public abstract class WithCommand extends InternalCommand {
     }
 
     @DefaultConfigMessage(forN = "not-building")
-    private final String NOT_BUILDING = "Nie jestes w trakcie tworzenia generatora!";
+    protected final String NOT_BUILDING = "Nie jestes w trakcie tworzenia generatora!";
 
     @DefaultConfigMessage(forN = "option-not-found")
-    private final String OPTION_NOT_FOUND = "Wprowadzono niepoprawna opcje!";
+    protected final String OPTION_NOT_FOUND = "Wprowadzono niepoprawna opcje!";
 
     @DefaultConfigMessage(forN = "success")
-    private final String SUCCESS = "Pomyslnie dodano wartosc!";
+    protected final String SUCCESS = "Pomyslnie dodano wartosc!";
 
     @Override
     public String getName() {

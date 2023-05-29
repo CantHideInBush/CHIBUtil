@@ -11,6 +11,7 @@ public abstract class CompleteCommand extends InternalCommand {
     private final BuilderCommand<?, ?> parent;
     public CompleteCommand(BuilderCommand<?, ?> parent) {
         this.parent = parent;
+        saveDefaultConfigMessages();
     }
 
     @Override
@@ -42,10 +43,10 @@ public abstract class CompleteCommand extends InternalCommand {
     }
 
     @DefaultConfigMessage(forN = "not-complete")
-    private final String NOT_COMPLETE = "Brakujace opcje: ";
+    protected final String NOT_COMPLETE = "Brakujace opcje: ";
 
     @DefaultConfigMessage(forN = "success")
-    private final String SUCCESS = "Utworzono nowy generator!";
+    protected final String SUCCESS = "Utworzono nowy generator!";
 
     @Override
     public String getName() {

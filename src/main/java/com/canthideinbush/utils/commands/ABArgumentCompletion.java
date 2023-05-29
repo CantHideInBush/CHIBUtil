@@ -28,7 +28,7 @@ public interface ABArgumentCompletion {
                     method.setAccessible(true);
                     try {
                         if (method.getTypeParameters().length > 0)
-                        return (List<String>) method.invoke(inst, args);
+                        return (List<String>) method.invoke(inst, (Object) args);
                         else return (List<String>) method.invoke(inst);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         throw new RuntimeException(e);
@@ -40,14 +40,12 @@ public interface ABArgumentCompletion {
             if (field.isAnnotationPresent(ABCompleter.class)) {
                 completer = field.getAnnotation(ABCompleter.class);
                 field.setAccessible(true);
-                completion.add(new TabCompleter(completer.index(), completer.arg(), new Function<String[], List<String>>() {
-                    @Override
-                    public List<String> apply(String[] args) {
-                        try {
-                            return Collections.singletonList(field.get(inst).toString());
-                        } catch (IllegalAccessException e) {
-                            throw new RuntimeException(e);
-                        }
+                completion.add(new TabCompleter(completer.index(), completer.arg(), args -> {
+                    try {
+                        return Collections.singletonList(field.get(inst).toString());
+                    } catch (
+                            IllegalAccessException e) {
+                        throw new RuntimeException(e);
                     }
                 }, completer.permission(), completer.localPermission()));
             }
