@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -220,16 +221,22 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
 
     protected void saveDefaultConfigMessages() {
         YAMLConfig config = this.getPlugin().getMessageConfig();
-        for (Field field : this.getClass().getDeclaredFields()) {
-            if (field.isAnnotationPresent(DefaultConfigMessage.class)) {
-                field.setAccessible(true);
-                DefaultConfigMessage dcm = field.getAnnotation(DefaultConfigMessage.class);
-                String path = getMessagesPath() + "." + dcm.forN();
-                if (!config.isSet(path)) {
-                    try {
-                        config.set(path, field.get(this).toString());
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
+        List<Class<?>> classes = new ArrayList<>();
+        classes.add(this.getClass());
+        classes.addAll(getAdditionalMessageClasses());
+        for (Class<?> clazz : classes) {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (field.isAnnotationPresent(DefaultConfigMessage.class)) {
+                    field.setAccessible(true);
+                    DefaultConfigMessage dcm = field.getAnnotation(DefaultConfigMessage.class);
+                    String path = getMessagesPath() + (clazz.equals(this.getClass()) ? "." : "." + clazz.getSimpleName() + ".") + dcm.forN();
+                    if (!config.isSet(path)) {
+                        try {
+                            config.set(path, field.get(clazz.equals(this.getClass()) ? this : null).toString());
+                        } catch (
+                                IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             }
@@ -241,6 +248,11 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
     }
 
     protected List<Permission> getAdditionalPermissions() {
+        return Collections.emptyList();
+    }
+
+
+    protected List<Class<?>> getAdditionalMessageClasses() {
         return Collections.emptyList();
     }
 
