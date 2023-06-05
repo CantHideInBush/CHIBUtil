@@ -33,6 +33,13 @@ public abstract class ParentCommand extends InternalCommand {
     }
 
 
+    public void saveDefaultConfigMessages() {
+        for (InternalCommand command : getSubcommands()) {
+            command.saveDefaultConfigMessages();
+        }
+        super.saveDefaultConfigMessages();
+    }
+
 
 
 
@@ -65,7 +72,7 @@ public abstract class ParentCommand extends InternalCommand {
     }
 
     public InternalCommand getSubCommand(String name) {
-        return getSubcommands().stream().filter(c -> c.getName().equals(name)).findAny().orElse(null);
+        return getSubcommands().stream().filter(c -> c.getName().equals(name) || c.getLabels().contains(name)).findAny().orElse(null);
     }
 
     @Override
@@ -77,7 +84,9 @@ public abstract class ParentCommand extends InternalCommand {
     public List<String> complete(String[] args, CommandSender sender) {
         InternalCommand subCommand;
         if (args.length == getArgIndex() + getArgCount()) {
-            return getSubcommands().stream().filter(command -> command.hasPermission(sender, command.getAbsolutePermission())).map(InternalCommand::getName).collect(Collectors.toList());
+            ArrayList<String> completion = new ArrayList<>(getSubcommands().stream().filter(command -> command.hasPermission(sender, command.getAbsolutePermission())).map(InternalCommand::getName).toList());
+            getSubcommands().stream().filter(command -> command.hasPermission(sender, command.getAbsolutePermission())).map(InternalCommand::getLabels).forEach(completion::addAll);
+            return completion;
         }
         else if ((subCommand = getSubCommand(args[getArgIndex() + getArgCount() - 1])) != null) {
             return subCommand.complete(args, sender);

@@ -33,17 +33,14 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
 
     public InternalCommand() {
         register(this.getPlugin());
-        saveDefaultConfigMessages();
     }
 
     public InternalCommand(CHIBPlugin plugin) {
         this.register(plugin);
-        saveDefaultConfigMessages();
     }
 
     public InternalCommand(CHIBPlugin plugin, String name) {
         this.register(plugin, name);
-        saveDefaultConfigMessages();
     }
 
     public abstract String getName();
@@ -253,6 +250,10 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
 
 
     protected List<Class<?>> getAdditionalMessageClasses() {
+        return Collections.emptyList();
+    }
+
+    protected List<String> getLabels() {
         return Collections.emptyList();
     }
 
