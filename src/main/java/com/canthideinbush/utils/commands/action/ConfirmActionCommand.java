@@ -45,9 +45,9 @@ public abstract class ConfirmActionCommand extends InternalCommand implements Li
     }
 
     @DefaultConfigMessage(forN = "no-action")
-    private final String a = "Nie mozesz wykonac zadnej akcji!";
+    protected final String a = "Nie mozesz wykonac zadnej akcji!";
     @DefaultConfigMessage(forN = "timed-out")
-    private final String b = "Ta akcja jest przedawniona!";
+    protected final String b = "Ta akcja jest przedawniona!";
 
 
     @Override
