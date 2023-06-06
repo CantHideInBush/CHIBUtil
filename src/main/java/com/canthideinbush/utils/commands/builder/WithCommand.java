@@ -90,13 +90,13 @@ public abstract class WithCommand extends InternalCommand {
     }
 
     @DefaultConfigMessage(forN = "not-building")
-    protected final String NOT_BUILDING = "Nie jestes w trakcie tworzenia generatora!";
+    private static final String NOT_BUILDING = "Nie jestes w trakcie tworzenia generatora!";
 
     @DefaultConfigMessage(forN = "option-not-found")
-    protected final String OPTION_NOT_FOUND = "Wprowadzono niepoprawna opcje!";
+    private static final String OPTION_NOT_FOUND = "Wprowadzono niepoprawna opcje!";
 
     @DefaultConfigMessage(forN = "success")
-    protected final String SUCCESS = "Pomyslnie dodano wartosc!";
+    private static final String SUCCESS = "Pomyslnie dodano wartosc!";
 
     @Override
     public String getName() {

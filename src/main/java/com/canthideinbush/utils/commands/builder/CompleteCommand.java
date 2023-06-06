@@ -43,10 +43,10 @@ public abstract class CompleteCommand extends InternalCommand {
     }
 
     @DefaultConfigMessage(forN = "not-complete")
-    protected static final String NOT_COMPLETE = "Brakujace opcje: ";
+    private static final String NOT_COMPLETE = "Brakujace opcje: ";
 
     @DefaultConfigMessage(forN = "success")
-    protected static final String SUCCESS = "Utworzono nowy generator!";
+    private static final String SUCCESS = "Utworzono nowy generator!";
 
 
 

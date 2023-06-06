@@ -218,15 +218,18 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
 
     protected void saveDefaultConfigMessages() {
         YAMLConfig config = this.getPlugin().getMessageConfig();
-        List<Class<?>> classes = new ArrayList<>();
-        classes.add(this.getClass());
-        classes.addAll(getAdditionalMessageClasses());
+        List<Class<?>> classes = new ArrayList<>(getAdditionalMessageClasses());
+        Class<?> c = this.getClass();
+        while (!c.equals(Object.class)) {
+            classes.add(c);
+            c = c.getSuperclass();
+        }
         for (Class<?> clazz : classes) {
             for (Field field : clazz.getDeclaredFields()) {
                 if (field.isAnnotationPresent(DefaultConfigMessage.class)) {
                     field.setAccessible(true);
                     DefaultConfigMessage dcm = field.getAnnotation(DefaultConfigMessage.class);
-                    String path = getMessagesPath() + (clazz.equals(this.getClass()) ? "." : "." + clazz.getSimpleName() + ".") + dcm.forN();
+                    String path = getMessagesPath() + (clazz.isAssignableFrom(this.getClass()) ? "." : "." + clazz.getSimpleName() + ".") + dcm.forN();
                     if (!config.isSet(path)) {
                         try {
                             config.set(path, field.get(clazz.equals(this.getClass()) ? this : null).toString());

@@ -46,10 +46,10 @@ public abstract class StartCommand extends InternalCommand{
     }
 
     @DefaultConfigMessage(forN = "unknown-builder")
-    protected final String UNKNOWN_BUILDER = "Nie mozna odnalezc tego typu generatora!";
+    private static final String UNKNOWN_BUILDER = "Nie mozna odnalezc tego typu generatora!";
 
     @DefaultConfigMessage(forN = "success")
-    protected final String SUCCESS = "Rozpoczeto tworzenie generatora!";
+    private static final String SUCCESS = "Rozpoczeto tworzenie generatora!";
 
     @Override
     public String getName() {

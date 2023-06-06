@@ -33,7 +33,7 @@ public abstract class ConfirmActionCommand extends InternalCommand implements Li
             return false;
         }
         if (hasTimedOut(sender)) {
-            sendConfigErrorMessage(sender, "timed-out");
+            sendConfigErrorMessage(sender, getMessagePath("timed-out"));
             getActionMap().remove(sender);
             getTimeMap().remove(sender);
             return false;
@@ -45,9 +45,9 @@ public abstract class ConfirmActionCommand extends InternalCommand implements Li
     }
 
     @DefaultConfigMessage(forN = "no-action")
-    protected final String a = "Nie mozesz wykonac zadnej akcji!";
+    private static final String a = "Nie mozesz wykonac zadnej akcji!";
     @DefaultConfigMessage(forN = "timed-out")
-    protected final String b = "Ta akcja jest przedawniona!";
+    private static final String b = "Ta akcja jest przedawniona!";
 
 
     @Override
@@ -67,7 +67,7 @@ public abstract class ConfirmActionCommand extends InternalCommand implements Li
     }
 
     public boolean hasTimedOut(CommandSender sender) {
-        return System.currentTimeMillis() - getTimeMap().get(sender) <= getTimeout();
+        return System.currentTimeMillis() - getTimeMap().get(sender) >= getTimeout();
     }
 
     protected long getTimeout() {
