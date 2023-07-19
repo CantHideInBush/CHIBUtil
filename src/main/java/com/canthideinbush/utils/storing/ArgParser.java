@@ -5,6 +5,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
 
+import java.util.Arrays;
+
 public class ArgParser {
 
 
@@ -73,5 +75,24 @@ public class ArgParser {
         return YAMLConfig.deserialize(c, next());
     }
 
+    public int getIndex() {
+        return index;
+    }
 
+    public int getLength() {
+        return args.length;
+    }
+
+
+    /**
+     *
+     * @return amount of times next() method can be invoked; remaining objects
+     */
+    public int remaining() {
+        return getLength() - getIndex() - 1;
+    }
+
+    public String[] remainingArgs() {
+        return Arrays.copyOfRange(args, getIndex(), getLength());
+    }
 }

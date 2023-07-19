@@ -1,10 +1,13 @@
 package com.canthideinbush.utils.commands;
 
 
+import com.canthideinbush.utils.Reflector;
 import com.canthideinbush.utils.managers.KeyedStorage;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.permissions.Permission;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 public class CHIBCommandsRegistry implements KeyedStorage<InternalCommand> {
 
@@ -18,6 +21,22 @@ public class CHIBCommandsRegistry implements KeyedStorage<InternalCommand> {
 
     public static InternalCommand getParentCommand(String name) {
         return commands.stream().filter(c -> c.getName().equals(name)).findAny().orElse(null);
+    }
+
+    @Override
+    public void unregister(InternalCommand command) {
+        KeyedStorage.super.unregister(command);
+    }
+
+    public void bukkitUnregister(InternalCommand command) {
+        if (command.getParentCommandClass() == null) {
+            Command bukkitCommand = Bukkit.getCommandMap().getCommand(command.getName());
+            if (bukkitCommand != null) bukkitCommand.unregister(Bukkit.getCommandMap());
+        }
+        for (Permission p : command.getAdditionalPermissions()) {
+            Bukkit.getPluginManager().removePermission(p);
+        }
+        Bukkit.getPluginManager().removePermission(command.getAbsolutePermission());
     }
 
     @Override

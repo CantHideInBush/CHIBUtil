@@ -8,6 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,6 +18,11 @@ public abstract class WithCommand extends InternalCommand {
     public WithCommand(BuilderCommand<?, ?> parent) {
         this.parent = parent;
         saveDefaultConfigMessages();
+    }
+
+    @Override
+    protected List<String> getAliases() {
+        return Collections.singletonList("w");
     }
 
     @Override
@@ -47,9 +53,10 @@ public abstract class WithCommand extends InternalCommand {
             return false;
         }
 
-        String value = parser.next();
+        String[] values = parser.remainingArgs();
+
         String error;
-        if ((error = builder.errorFor(option, value)) != null) {
+        if ((error = builder.errorFor(option, values)) != null) {
             getPlugin().getUtilsProvider().getChatUtils().sendMessage(sender,
                     error,
                     ChatColor.RED
@@ -57,7 +64,7 @@ public abstract class WithCommand extends InternalCommand {
             return false;
         }
 
-        builder.with(option, value);
+        builder.with(option, values);
 
 
 
@@ -69,19 +76,15 @@ public abstract class WithCommand extends InternalCommand {
 
     @Override
     public List<String> complete(String[] args, CommandSender sender) {
-
         if (parent.isBuilding(sender)) {
             ObjectBuilder<?> builder = parent.getBuilder(sender);
-            if (args.length == getArgIndex() + 1) {
+            if (args.length - 1 == getArgIndex()) {
                 return builder.options();
             }
-            else if (args.length == getArgIndex() + 2) {
+            else if (args.length - 1 >= getArgIndex() + 1) {
                 String option = args[getArgIndex()];
-                return builder.complete(sender, option);
-            }
-            else if (args.length == getArgIndex() + 3) {
-                String value = args[getArgIndex() + 1];
-                return builder.completeValue(sender, value);
+                String[] values = Arrays.copyOfRange(args, getArgIndex() + 1, args.length);
+                return builder.formatCompletion(builder.complete(sender, option, values), option, values);
             }
         }
 
@@ -89,8 +92,9 @@ public abstract class WithCommand extends InternalCommand {
         return Collections.emptyList();
     }
 
+
     @DefaultConfigMessage(forN = "not-building")
-    private static final String NOT_BUILDING = "Nie jestes w trakcie tworzenia generatora!";
+    private static final String NOT_BUILDING = "Nie jestes w trakcie tworzenia obiektu!";
 
     @DefaultConfigMessage(forN = "option-not-found")
     private static final String OPTION_NOT_FOUND = "Wprowadzono niepoprawna opcje!";

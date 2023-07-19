@@ -19,37 +19,51 @@ public interface ABArgumentCompletion {
         List<TabCompleter> completion = new ArrayList<>();
         ABCompleter completer;
         Object inst = this;
-        for (Method method : this.getClass().getDeclaredMethods()) {
-            if (method.isAnnotationPresent(ABCompleter.class)) {
-                completer = method.getAnnotation(ABCompleter.class);
+
+        List<Class<?>> classes = new ArrayList<>();
+        Class<?> c = this.getClass();
+        while (!c.equals(Object.class)) {
+            classes.add(c);
+            c = c.getSuperclass();
+        }
+        for (Class<?> clazz : classes) {
+            for (Method method : clazz.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(ABCompleter.class)) {
+                    completer = method.getAnnotation(ABCompleter.class);
 
 
-                completion.add(new TabCompleter(completer.index(), completer.arg(), (args) -> {
-                    method.setAccessible(true);
-                    try {
-                        if (method.getTypeParameters().length > 0)
-                        return (List<String>) method.invoke(inst, (Object) args);
-                        else return (List<String>) method.invoke(inst);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
-                }, completer.permission()));
+                    completion.add(new TabCompleter(completer.index(), completer.arg(), (args) -> {
+                        method.setAccessible(true);
+                        try {
+                            if (method.getParameterTypes().length > 0) {
+                                return (List<String>) method.invoke(inst, (Object) args);
+                            }
+                            else {
+                                return (List<String>) method.invoke(inst);
+                            }
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }, completer.permission()));
+                }
+            }
+            for (Field field : this.getClass().getDeclaredFields()) {
+                if (field.isAnnotationPresent(ABCompleter.class)) {
+                    completer = field.getAnnotation(ABCompleter.class);
+                    field.setAccessible(true);
+                    completion.add(new TabCompleter(completer.index(), completer.arg(), args -> {
+                        try {
+                            return Collections.singletonList(field.get(inst).toString());
+                        } catch (
+                                IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }, completer.permission(), completer.localPermission()));
+                }
             }
         }
-        for (Field field : this.getClass().getDeclaredFields()) {
-            if (field.isAnnotationPresent(ABCompleter.class)) {
-                completer = field.getAnnotation(ABCompleter.class);
-                field.setAccessible(true);
-                completion.add(new TabCompleter(completer.index(), completer.arg(), args -> {
-                    try {
-                        return Collections.singletonList(field.get(inst).toString());
-                    } catch (
-                            IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    }
-                }, completer.permission(), completer.localPermission()));
-            }
-        }
+
+
         return completion;
     }
 

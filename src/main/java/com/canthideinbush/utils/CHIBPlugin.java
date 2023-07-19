@@ -1,5 +1,7 @@
 package com.canthideinbush.utils;
 
+import com.canthideinbush.utils.commands.CHIBCommandsRegistry;
+import com.canthideinbush.utils.commands.InternalCommand;
 import com.canthideinbush.utils.commands.ShortcutCommand;
 import com.canthideinbush.utils.chat.ChatUtils;
 import com.canthideinbush.utils.gui.GUIManager;
@@ -7,6 +9,8 @@ import com.canthideinbush.utils.storing.YAMLConfig;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class CHIBPlugin extends JavaPlugin {
 
@@ -50,5 +54,22 @@ public abstract class CHIBPlugin extends JavaPlugin {
         }
     }
 
-    //Requires public static CHIBPlugin getInstance()
+    @Override
+    public void onDisable() {
+        disableCommands();
+    }
+
+
+
+    private void disableCommands() {
+        List<InternalCommand> forUnregister = new ArrayList<>();
+        for (InternalCommand command : CHIBCommandsRegistry.instance.getObjects()) {
+            if (command.getPlugin().equals(this)) {
+                CHIBCommandsRegistry.instance.bukkitUnregister(command);
+            }
+            forUnregister.add(command);
+        }
+        forUnregister.forEach(CHIBCommandsRegistry.instance::unregister);
+    }
+
 }

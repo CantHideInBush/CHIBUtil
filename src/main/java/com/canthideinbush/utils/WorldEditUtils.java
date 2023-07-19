@@ -27,6 +27,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import java.io.*;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class WorldEditUtils {
@@ -67,94 +68,122 @@ public class WorldEditUtils {
         return null;
     }
 
-
     public void pasteAt(Location location, String name) {
-        pasteAt(location, name, true);
+        pasteAt(location, name, true, null);
     }
+
+    public void pasteAt(Location location, String name, Runnable runnable) {
+        pasteAt(location, name, true, runnable);
+    }
+
 
     public void pasteAt(Location location, String name, boolean useWorldEdit) {
         Clipboard clipboard = findByName(name, useWorldEdit);
-        pasteAt(location, clipboard);
+        pasteAt(location, clipboard, null);
+    }
+
+
+    public void pasteAt(Location location, String name, boolean useWorldEdit, Runnable runnable) {
+        Clipboard clipboard = findByName(name, useWorldEdit);
+        pasteAt(location, clipboard, runnable);
     }
 
     public void pasteAt(Location location, Clipboard clipboard) {
-        EditSession session = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(location.getWorld()));
-        Operation operation = new ClipboardHolder(clipboard).createPaste(session)
-                .to(BlockVector3.at(location.getBlockX(), location.getBlockY(), location.getBlockZ()))
-                .build();
-        try {
-            Operations.complete(operation);
-        } catch (WorldEditException e) {
-            e.printStackTrace();
-        }
-        session.close();
+        pasteAt(location, clipboard, null);
     }
 
+    public void pasteAt(Location location, Clipboard clipboard, Runnable runnable) {
+        Bukkit.getScheduler().runTaskAsynchronously(CHIBUtils.getInstance(), () -> {
+            EditSession session = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(location.getWorld()));
+            Operation operation = new ClipboardHolder(clipboard).createPaste(session)
+                    .to(BlockVector3.at(location.getBlockX(), location.getBlockY(), location.getBlockZ()))
+                    .build();
+            try {
+                Operations.complete(operation);
+            } catch (
+                    WorldEditException e) {
+                e.printStackTrace();
+            }
+            session.close();
+            if (runnable != null) runnable.run();
+        });
+    }
 
     public void inversePasteAt(Location location, String name) {
-        Clipboard clipboard = findByName(name);
+        inversePasteAt(location, name, null);
+    }
+
+    public void inversePasteAt(Location location, String name, Runnable runnable) {
+        Bukkit.getScheduler().runTaskAsynchronously(CHIBUtils.getInstance(), () -> {
+            Clipboard clipboard = findByName(name);
 
 
-        BlockVector3 origin = clipboard.getMinimumPoint();
-        BlockVector3 dimensions = clipboard.getDimensions();
-        for (int x = origin.getX(); x < origin.getX() + dimensions.getX(); x++) {
-            for (int y = origin.getY(); y < origin.getY() + dimensions.getY(); y++) {
-                for (int z = origin.getZ(); z < origin.getZ() + dimensions.getZ(); z++) {
-                    BlockVector3 pos = BlockVector3.at(x, y, z);
-                    if (!clipboard.getBlock(pos).getBlockType().equals(BlockTypes.AIR)) {
-                        try {
-                            assert BlockTypes.AIR != null;
-                            clipboard.setBlock(pos, BlockTypes.AIR.getDefaultState());
-                        } catch (WorldEditException e) {
-                            throw new RuntimeException(e);
+            BlockVector3 origin = clipboard.getMinimumPoint();
+            BlockVector3 dimensions = clipboard.getDimensions();
+            for (int x = origin.getX(); x < origin.getX() + dimensions.getX(); x++) {
+                for (int y = origin.getY(); y < origin.getY() + dimensions.getY(); y++) {
+                    for (int z = origin.getZ(); z < origin.getZ() + dimensions.getZ(); z++) {
+                        BlockVector3 pos = BlockVector3.at(x, y, z);
+                        if (!clipboard.getBlock(pos).getBlockType().equals(BlockTypes.AIR)) {
+                            try {
+                                assert BlockTypes.AIR != null;
+                                clipboard.setBlock(pos, BlockTypes.AIR.getDefaultState());
+                            } catch (
+                                    WorldEditException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
                     }
                 }
             }
-        }
 
 
-        EditSession session = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(location.getWorld()));
-        Operation operation = new ClipboardHolder(clipboard).createPaste(session)
-                .ignoreAirBlocks(false)
-                .to(BlockVector3.at(location.getBlockX(), location.getBlockY(), location.getBlockZ()))
-                .build();
-        try {
-            Operations.complete(operation);
-        } catch (WorldEditException e) {
-            e.printStackTrace();
-        }
-        session.close();
+            EditSession session = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(location.getWorld()));
+            Operation operation = new ClipboardHolder(clipboard).createPaste(session)
+                    .ignoreAirBlocks(false)
+                    .to(BlockVector3.at(location.getBlockX(), location.getBlockY(), location.getBlockZ()))
+                    .build();
+            try {
+                Operations.complete(operation);
+            } catch (
+                    WorldEditException e) {
+                e.printStackTrace();
+            }
+            session.close();
+            if (runnable != null) runnable.run();
+        });
     }
 
-    public Clipboard swapAt(Location location, String name) {
-        Clipboard clipboard = findByName(name);
+    public void swapAt(Location location, String name, Consumer<Clipboard> consumer) {
+        Bukkit.getScheduler().runTaskAsynchronously(CHIBUtils.getInstance(), () -> {
+            Clipboard clipboard = findByName(name);
 
-        BlockVector3 offset = clipboard.getRegion().getMinimumPoint().subtract(clipboard.getOrigin());
+            BlockVector3 offset = clipboard.getRegion().getMinimumPoint().subtract(clipboard.getOrigin());
 
-        BlockVector3 vectorLocation = BukkitAdapter.adapt(location).toVector().toBlockPoint();
+            BlockVector3 vectorLocation = BukkitAdapter.adapt(location).toVector().toBlockPoint();
 
-        BlockVector3 newMin = vectorLocation.add(offset);
-
-
-
-        CuboidRegion region = new CuboidRegion(
-                newMin,
-                BlockVector3.at(newMin.getBlockX() - 1, newMin.getBlockY() - 1, newMin.getBlockZ() - 1).add(clipboard.getDimensions()));
-        BlockArrayClipboard swapped = new BlockArrayClipboard(region);
-        swapped.setOrigin(vectorLocation);
-        ForwardExtentCopy copy = new ForwardExtentCopy(BukkitAdapter.adapt(location.getWorld()), region, swapped, newMin);
-
-        try {
-            Operations.complete(copy);
-        } catch (WorldEditException e) {
-            throw new RuntimeException(e);
-        }
-
-        pasteAt(location, clipboard);
+            BlockVector3 newMin = vectorLocation.add(offset);
 
 
-        return swapped;
+            CuboidRegion region = new CuboidRegion(
+                    newMin,
+                    BlockVector3.at(newMin.getBlockX() - 1, newMin.getBlockY() - 1, newMin.getBlockZ() - 1).add(clipboard.getDimensions()));
+            BlockArrayClipboard swapped = new BlockArrayClipboard(region);
+            swapped.setOrigin(vectorLocation);
+            ForwardExtentCopy copy = new ForwardExtentCopy(BukkitAdapter.adapt(location.getWorld()), region, swapped, newMin);
+
+            try {
+                Operations.complete(copy);
+            } catch (
+                    WorldEditException e) {
+                throw new RuntimeException(e);
+            }
+
+            pasteAt(location, clipboard);
+
+
+            consumer.accept(swapped);
+        });
     }
 
 

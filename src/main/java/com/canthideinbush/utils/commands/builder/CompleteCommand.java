@@ -6,12 +6,20 @@ import com.canthideinbush.utils.commands.InternalCommand;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
+import java.util.List;
+
 public abstract class CompleteCommand extends InternalCommand {
 
     private final BuilderCommand<?, ?> parent;
     public CompleteCommand(BuilderCommand<?, ?> parent) {
         this.parent = parent;
         saveDefaultConfigMessages();
+    }
+
+    @Override
+    protected List<String> getAliases() {
+        return Collections.singletonList("c");
     }
 
     @Override
@@ -46,7 +54,7 @@ public abstract class CompleteCommand extends InternalCommand {
     private static final String NOT_COMPLETE = "Brakujace opcje: ";
 
     @DefaultConfigMessage(forN = "success")
-    private static final String SUCCESS = "Utworzono nowy generator!";
+    private static final String SUCCESS = "Utworzono nowy obiekt!";
 
 
 

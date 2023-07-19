@@ -70,6 +70,12 @@ public class ChanceMap<T> implements ABSave  {
         return null;
     }
 
+
+    public T getRandomOrDefault(T def) {
+        T random = getRandom();
+        return random != null ? random : def;
+    }
+
     public boolean isEmpty() {
         return chanceMap.isEmpty();
     }

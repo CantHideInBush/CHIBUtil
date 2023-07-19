@@ -21,7 +21,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -66,7 +65,7 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
     }
 
     public String getAbsolutePermission() {
-        if (getParentCommand() != null) return getParentCommand().getAbsolutePermission() + "." + getPermission();
+        if (getParentCommandClass() != null) return getParentCommand().getAbsolutePermission() + "." + getPermission();
         return getPermission();
     }
 
@@ -256,7 +255,7 @@ public abstract class InternalCommand implements TabCompleter, CommandExecutor, 
         return Collections.emptyList();
     }
 
-    protected List<String> getLabels() {
+    protected List<String> getAliases() {
         return Collections.emptyList();
     }
 

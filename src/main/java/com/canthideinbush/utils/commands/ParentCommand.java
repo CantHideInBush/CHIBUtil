@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class ParentCommand extends InternalCommand {
 
@@ -72,7 +71,7 @@ public abstract class ParentCommand extends InternalCommand {
     }
 
     public InternalCommand getSubCommand(String name) {
-        return getSubcommands().stream().filter(c -> c.getName().equals(name) || c.getLabels().contains(name)).findAny().orElse(null);
+        return getSubcommands().stream().filter(c -> c.getName().equals(name) || c.getAliases().contains(name)).findAny().orElse(null);
     }
 
     @Override
@@ -85,7 +84,7 @@ public abstract class ParentCommand extends InternalCommand {
         InternalCommand subCommand;
         if (args.length == getArgIndex() + getArgCount()) {
             ArrayList<String> completion = new ArrayList<>(getSubcommands().stream().filter(command -> command.hasPermission(sender, command.getAbsolutePermission())).map(InternalCommand::getName).toList());
-            getSubcommands().stream().filter(command -> command.hasPermission(sender, command.getAbsolutePermission())).map(InternalCommand::getLabels).forEach(completion::addAll);
+            getSubcommands().stream().filter(command -> command.hasPermission(sender, command.getAbsolutePermission())).map(InternalCommand::getAliases).forEach(completion::addAll);
             return completion;
         }
         else if ((subCommand = getSubCommand(args[getArgIndex() + getArgCount() - 1])) != null) {

@@ -23,6 +23,10 @@ public abstract class StartCommand extends InternalCommand{
         saveDefaultConfigMessages();
     }
 
+    @Override
+    protected List<String> getAliases() {
+        return Collections.singletonList("s");
+    }
 
     @Override
     public boolean execute(Player sender, String[] args) {
@@ -55,6 +59,7 @@ public abstract class StartCommand extends InternalCommand{
     public String getName() {
         return "start";
     }
+
 
     @Override
     public List<String> complete(String[] args, CommandSender sender) {
