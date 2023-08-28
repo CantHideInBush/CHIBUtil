@@ -37,6 +37,8 @@ public class WorldGuardUtils {
         manager.addRegion(newRegion);
     }
 
+
+
     public static void expand(World world, ProtectedCuboidRegion region, BlockVector3... vector3) {
         CuboidRegion newRegion = new CuboidRegion(region.getMinimumPoint(), region.getMaximumPoint());
         newRegion.expand(vector3);
@@ -48,5 +50,6 @@ public class WorldGuardUtils {
         newRegion.contract(vector3);
         redefine(world, region, newRegion);
     }
+
 
 }

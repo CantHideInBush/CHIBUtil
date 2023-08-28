@@ -6,6 +6,7 @@ import com.canthideinbush.utils.storing.items.AxolotlBucketValues;
 import com.canthideinbush.utils.storing.items.HRItem;
 import com.canthideinbush.utils.storing.YAMLConfig;
 import com.canthideinbush.utils.tempblock.TempBlockManager;
+import com.canthideinbush.utils.worldedit.ReferenceTable;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -18,6 +19,7 @@ public class CHIBUtils extends CHIBPlugin {
         ConfigurationSerialization.registerClass(HRItem.class);
         ConfigurationSerialization.registerClass(AxolotlBucketValues.class);
         ConfigurationSerialization.registerClass(BasicShopGUI.class);
+        ConfigurationSerialization.registerClass(ReferenceTable.class);
     }
 
     private YAMLConfig config;

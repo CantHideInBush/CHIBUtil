@@ -29,11 +29,11 @@ public class ChatUtils {
         return ChatColor.translateAlternateColorCodes('&', messageConfig.getString(path, getDefaultMessage(path)));
     }
 
-    public void sendConfigMessage(String path, Entity entity, ChatColor color) {
+    public void sendConfigMessage(String path, CommandSender entity, ChatColor color) {
         entity.sendMessage(createMessage(getMessage(path), color));
     }
 
-    public void sendConfigMessage(String path, Entity entity, ChatColor color, Object... args) {
+    public void sendConfigMessage(String path, CommandSender entity, ChatColor color, Object... args) {
         entity.sendMessage(createMessage(String.format(getMessage(path), args), color));
     }
 

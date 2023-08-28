@@ -100,7 +100,7 @@ public abstract class WithCommand extends InternalCommand {
     private static final String OPTION_NOT_FOUND = "Wprowadzono niepoprawna opcje!";
 
     @DefaultConfigMessage(forN = "success")
-    private static final String SUCCESS = "Pomyslnie dodano wartosc!";
+    private static final String SUCCESS = "Polecenie wykonane pomyslnie!";
 
     @Override
     public String getName() {

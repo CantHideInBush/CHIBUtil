@@ -1,5 +1,8 @@
-package com.canthideinbush.utils;
+package com.canthideinbush.utils.worldedit;
 
+import com.canthideinbush.utils.CHIBUtils;
+import com.canthideinbush.utils.FileUtils;
+import com.canthideinbush.utils.UtilsProvider;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
@@ -104,10 +107,61 @@ public class WorldEditUtils {
                     WorldEditException e) {
                 e.printStackTrace();
             }
+
             session.close();
             if (runnable != null) runnable.run();
         });
     }
+    public SessionProgressTracker trackPasteAt(Location location, String name, Consumer<SessionProgress> consumer, long period) {
+        Clipboard clipboard = findByName(name, true);
+        return trackPasteAt(location, clipboard, consumer, period);
+    }
+
+    public SessionProgressTracker trackPasteAt(Location location, String name, Consumer<SessionProgress> consumer, long period, ReferenceTable table) {
+        Clipboard clipboard = findByName(name, true);
+        return trackPasteAt(location, clipboard, consumer, period, table);
+    }
+
+    public SessionProgressTracker trackPasteAt(Location location, String name, boolean useWorldEdit, Consumer<SessionProgress> consumer, long period) {
+        Clipboard clipboard = findByName(name, useWorldEdit);
+        return trackPasteAt(location, clipboard, consumer, period, null);
+    }
+
+    public SessionProgressTracker trackPasteAt(Location location, String name, boolean useWorldEdit, Consumer<SessionProgress> consumer, long period, ReferenceTable referenceTable) {
+        Clipboard clipboard = findByName(name, useWorldEdit);
+        return trackPasteAt(location, clipboard, consumer, period, referenceTable);
+    }
+
+    public SessionProgressTracker trackPasteAt(Location location, Clipboard clipboard, Consumer<SessionProgress> consumer, long period) {
+        return trackPasteAt(location, clipboard, consumer, period, null);
+    }
+
+    public SessionProgressTracker trackPasteAt(Location location, Clipboard clipboard, Consumer<SessionProgress> consumer, long period, ReferenceTable referenceTable) {
+        EditSession session = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(location.getWorld()));
+        SessionProgressTracker tracker = new SessionProgressTracker(provider, clipboard, session, sessionProgress -> {
+            consumer.accept(sessionProgress);
+            if (sessionProgress.isComplete()) session.close();
+        }, period, true, referenceTable);
+        Bukkit.getScheduler().runTaskAsynchronously(CHIBUtils.getInstance(), () -> {
+            Operation operation = new ClipboardHolder(clipboard).createPaste(session)
+                    .to(BlockVector3.at(location.getBlockX(), location.getBlockY(), location.getBlockZ()))
+                    .build();
+            try {
+                Operations.complete(operation);
+            } catch (
+                    WorldEditException e) {
+                e.printStackTrace();
+            }
+
+            tracker.getProgress().complete();
+
+        });
+        return tracker;
+    }
+
+
+
+
 
     public void inversePasteAt(Location location, String name) {
         inversePasteAt(location, name, null);

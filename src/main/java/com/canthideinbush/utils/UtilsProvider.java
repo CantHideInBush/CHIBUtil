@@ -1,6 +1,7 @@
 package com.canthideinbush.utils;
 
 import com.canthideinbush.utils.chat.ChatUtils;
+import com.canthideinbush.utils.worldedit.WorldEditUtils;
 
 public class UtilsProvider {
 
